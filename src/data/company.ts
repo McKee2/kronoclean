@@ -72,7 +72,64 @@ export const COMPANY = {
 
   /** true först när /public/og-nordclean.jpg (1200x630) faktiskt finns. */
   ogImageConfirmed: false,
+
+  /**
+   * TODO: true först när nordclean.se faktiskt är registrerad och hennes.
+   * Detta är värre än en platshållartelefon — det är en EXTERN referens.
+   * canonical, og:url, sitemapens loc och JSON-LD:ns @id pekar alla dit.
+   * Registrerar någon annan domänen pekar sajten aktivt på dem.
+   */
+  domainConfirmed: false,
 } as const;
+
+/**
+ * Flaggor som gatar RENDERAT innehåll eller EXTERNA referenser. Är någon
+ * av dem false får sajten inte byggas för produktion — se
+ * assertRedoForProduktion().
+ *
+ * Medvetet UTANFÖR listan, och varför:
+ *   addressConfirmed  Hon städar hemma hos kund. false är det permanent
+ *                     rätta svaret, inte ett ofärdigt tillstånd.
+ *   ogImageConfirmed  Har en sann fallback (loggan). Inget osant renderas.
+ *   orgNrConfirmed    Renderas ingenstans än, och ska aldrig in i JSON-LD.
+ *   areasConfirmed    Utelämnas tyst ur grafen. Ingen besökare ser skillnad.
+ */
+const LANSERINGSSPARRAR: ReadonlyArray<readonly [string, boolean, string]> = [
+  ['phoneConfirmed', COMPANY.phoneConfirmed, 'telefonnumret — sidans enda konvertering'],
+  ['ownerNameConfirmed', COMPANY.ownerNameConfirmed, 'ägarens förnamn — renderas i hero och fotokortet'],
+  ['responsePromiseConfirmed', COMPANY.responsePromiseConfirmed, 'svarstidslöftet — ett löfte hon måste kunna hålla'],
+  ['domainConfirmed', COMPANY.domainConfirmed, 'domänen — canonical, og:url, sitemap och JSON-LD pekar dit'],
+];
+
+/**
+ * Vägrar bygga för produktion så länge något obekräftat fält skulle nå
+ * publik. Samma princip som flaggorna, ett steg upp: en flagga är en
+ * mänsklig handling, och ett bygge som vägrar är den handlingen på
+ * systemnivå. Det finns ingen grafisk lösning på "sidans enda
+ * konvertering saknas" — och varje grafisk lösning gör det lättare att
+ * glömma.
+ *
+ * TILLAT_PLATSHALLARE=1 släpper igenom ett medvetet stagingbygge.
+ * Sätt den aldrig i en deploy-pipeline mot produktion.
+ */
+export const assertRedoForProduktion = (): void => {
+  if (!import.meta.env.PROD) return;
+  if (import.meta.env.TILLAT_PLATSHALLARE) return;
+
+  const kvar = LANSERINGSSPARRAR.filter(([, bekraftad]) => !bekraftad);
+  if (kvar.length === 0) return;
+
+  const rader = kvar
+    .map(([flagga, , varfor]) => `  - ${flagga}: ${varfor}`)
+    .join('\n');
+
+  throw new Error(
+    `Produktionsbygge stoppat: ${kvar.length} obekräftad(e) uppgift(er) ` +
+      `skulle nå publik.\n\n${rader}\n\n` +
+      'Bekräfta uppgiften med kunden och vänd flaggan i src/data/company.ts.\n' +
+      'För ett medvetet stagingbygge: TILLAT_PLATSHALLARE=1 npm run build\n',
+  );
+};
 
 /** Byggs av hasFTax/hasInsurance så inget osant kan hamna på sidan. */
 export const trustMarkers = (): string[] => {

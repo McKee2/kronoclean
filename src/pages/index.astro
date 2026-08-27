@@ -7,7 +7,12 @@ import {
   absoluteUrl,
   ogImageUrl,
   buildStructuredData,
+  assertRedoForProduktion,
 } from '../data/company';
+
+// Vägrar bygga för produktion så länge något obekräftat fält skulle nå
+// publik. No-op i dev. TILLAT_PLATSHALLARE=1 för medvetet stagingbygge.
+assertRedoForProduktion();
 
 // Astro.site kommer från astro.config.mjs, Astro.url är den aktuella sidan.
 // Hårdkoda aldrig domänen här — den finns redan på ett ställe.
