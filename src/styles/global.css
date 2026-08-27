@@ -3,19 +3,40 @@
 /**
  * Nordclean designtokens.
  * Marinblå och ljusblå är avlästa ur loggan. Resten är byggt runt dem.
+ *
+ * Kontrastvärdena i kommentarerna är uträknade, inte uppskattade: sRGB
+ * relativ luminans enligt WCAG 2.x, verifierade två oberoende vägar
+ * (hex-komposit och oklab->sRGB med rundtrippskontroll).
+ *
+ * REGEL: en färgtoken vars namn inte säger "text" är inte godkänd för
+ * liten text. Liten text = under 24px normal eller under 18.66px fet.
  */
 @theme {
-  /* Från loggan */
-  --color-navy: #16385c;
-  --color-sky: #4a90ce;
+  /* Från loggan. Oförändrade — de är varumärket. */
+  --color-navy: #16385c; /* mist 10.80 · vitt 11.97 */
+  --color-sky: #4a90ce; /* mist 3.07 · vitt 3.40 — ikoner, ramar, hover, STOR text */
 
   /* Härledda */
   --color-navy-deep: #0f2740;
   --color-sky-soft: #e8f1f9;
   --color-mist: #EEF4F9;
-  --color-ink: #1a2733;
-  --color-slate: #5c7285;
-  --color-line: #d5e3ef;
+  --color-ink: #1a2733; /* mist 13.71 · vitt 15.20 */
+  --color-line: #d5e3ef; /* mist 1.18 · vitt 1.31 — dekorativ avdelare, ej UI-gräns */
+
+  /**
+   * Textsäkra tokens. Båda klarar 4.5:1 mot BÅDE mist och vitt, så de
+   * kan inte bli ogiltiga beroende på vilket underlag de hamnar på.
+   * Framräknade i OKLCh med bevarad ton — samma kulör, lägre ljushet.
+   */
+  --color-sky-text: #276faa; /* mist 4.81 · vitt 5.33 — sky mörkad för liten text */
+  --color-slate: #556b7d; /* mist 5.00 · vitt 5.55 — brödtext och sekundärtext */
+
+  /**
+   * Ren dekoration. Platt värde i stället för opacitetsmodifierare:
+   * exakt samma pixel som sky vid 35 % på vitt gav, rgb(192,216,238).
+   * aria-hidden-grafik undantas av WCAG 1.4.11. Använd aldrig till text.
+   */
+  --color-sky-wash: #c0d8ee; /* vitt 1.47 */
 
   /* Typografi — serif i rubriker, humanistisk sans i brödtext */
   --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
