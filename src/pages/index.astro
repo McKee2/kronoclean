@@ -1,6 +1,19 @@
 ---
 import '../styles/global.css';
 import Hero from '../components/sections/Hero.astro';
+import {
+  COMPANY,
+  SEO,
+  absoluteUrl,
+  ogImageUrl,
+  buildStructuredData,
+} from '../data/company';
+
+// Astro.site kommer från astro.config.mjs, Astro.url är den aktuella sidan.
+// Hårdkoda aldrig domänen här — den finns redan på ett ställe.
+const canonical = absoluteUrl(Astro.site, Astro.url.pathname);
+const ogImage = ogImageUrl(Astro.site);
+const structuredData = buildStructuredData(Astro.site);
 ---
 
 <!doctype html>
@@ -8,11 +21,46 @@ import Hero from '../components/sections/Hero.astro';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hemstädning i Växjö — Nordclean</title>
-    <meta
-      name="description"
-      content="Hemstädning i Växjö med RUT-avdrag. Samma person varje gång. Ring för bokning."
-    />
+
+    <title>{SEO.title}</title>
+    <meta name="description" content={SEO.description} />
+    <link rel="canonical" href={canonical} />
+
+    {/* TODO: byt ut båda — de är Astros standardmärke, inte Nordcleans */}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* apple-touch-icon länkas först när filen finns. En 404 i <head>
+        är samma sorts osanning som en platshållartelefon. */}
+    <meta name="theme-color" content={SEO.themeColor} />
+
+    {/* De fyra obligatoriska enligt ogp.me: type, title, url, image */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={SEO.title} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    {/* Rekommenderade */}
+    <meta property="og:image:alt" content={SEO.ogImageAlt} />
+    <meta property="og:description" content={SEO.description} />
+    <meta property="og:site_name" content={COMPANY.name} />
+    <meta property="og:locale" content={SEO.locale} />
+
+    {/* X/Twitter läser OG för titel, text och bild — bara korttypen behövs.
+        OBS: att X faller tillbaka på OG är OVERIFIERAT i genomgången. */}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/*
+      set:html behövs av två skäl:
+      1) Astro behandlar <script>-innehåll som JavaScript att bundla, och
+         {}-interpolation i ett raw-text-element är inte pålitligt.
+      2) Astro escapar {uttryck}; ett escape:at " blir &quot; och JSON:en
+         slutar parsa.
+      Säkert här: indata är JSON.stringify av modullokala konstanter.
+      Ingen användarinmatning, inget CMS, statiskt bygge.
+      Blir datan någonsin dynamisk måste < härdas — JSON.stringify escapar
+      inte <, och en sträng som innehåller </script> avslutar elementet:
+        .replace(/</g, '\\u003c')
+    */}
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
   <body>
     <main>
