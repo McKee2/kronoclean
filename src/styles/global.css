@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/**
+ * Nordclean designtokens.
+ * Marinblå och ljusblå är avlästa ur loggan. Resten är byggt runt dem.
+ */
+@theme {
+  /* Från loggan */
+  --color-navy: #16385c;
+  --color-sky: #4a90ce;
+
+  /* Härledda */
+  --color-navy-deep: #0f2740;
+  --color-sky-soft: #e8f1f9;
+  --color-mist: #EEF4F9;
+  --color-ink: #1a2733;
+  --color-slate: #5c7285;
+  --color-line: #d5e3ef;
+
+  /* Typografi — serif i rubriker, humanistisk sans i brödtext */
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-sans: "Karla", system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/**
+ * Sidbakgrunden är mist, inte vitt. Vitt sparas till kort och ytor
+ * som ska lyfta ur bakgrunden.
+ */
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-mist);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Synlig tangentbordsfokus överallt — inte bara vid musinteraktion */
+:focus-visible {
+  outline: 2px solid var(--color-sky);
+  outline-offset: 3px;
+}
