@@ -102,19 +102,111 @@ const LANSERINGSSPARRAR: ReadonlyArray<readonly [string, boolean, string]> = [
 ];
 
 /**
+ * Grenen som Cloudflare Pages behandlar som produktion.
+ *
+ * Hårdkodad här, aldrig läst ur en miljövariabel. Läste vi den ur env
+ * skulle en felsatt variabel kunna flytta vad "produktion" betyder, och
+ * hela spärren vore beroende av en inställning igen.
+ */
+const PRODUKTIONSGREN = 'main';
+
+type Byggkontext =
+  | 'dev'
+  | 'lokal-staging'
+  | 'lokal-produktion'
+  | 'cf-preview'
+  | 'cf-produktion'
+  | 'cf-okand-gren';
+
+/**
+ * Vilket slags bygge är detta?
+ *
+ * Undantaget för platshållare härleds ur GRENEN, inte ur en miljövariabel.
+ * Det betyder att ingenting behöver sättas i Cloudflare för att en preview
+ * ska fungera — och att det inte finns någon inställning som kan bli kvar
+ * och tyst göra produktionsspärren verkningslös.
+ *
+ * Mätt, inte gissat: import.meta.env.PROD är true även på en preview-gren
+ * (PROD skiljer på `astro dev` och `astro build`, inte på preview och
+ * produktion), så PROD ensamt kan inte avgöra frågan. CF_PAGES,
+ * CF_PAGES_BRANCH, CF_PAGES_URL och CI når koden vid byggtid som strängar.
+ *
+ * Okänd gren på Cloudflare är fail-closed: vet vi inte var vi är, bygger
+ * vi inte med platshållare.
+ */
+export const byggkontext = (): Byggkontext => {
+  if (!import.meta.env.PROD) return 'dev';
+
+  if (!import.meta.env.CF_PAGES) {
+    return import.meta.env.TILLAT_PLATSHALLARE
+      ? 'lokal-staging'
+      : 'lokal-produktion';
+  }
+
+  const gren = import.meta.env.CF_PAGES_BRANCH;
+  if (!gren) return 'cf-okand-gren';
+
+  return gren === PRODUKTIONSGREN ? 'cf-produktion' : 'cf-preview';
+};
+
+/** Kontexter där ett obekräftat fält får renderas. */
+const TILLATER_PLATSHALLARE = new Set<Byggkontext>([
+  'dev',
+  'lokal-staging',
+  'cf-preview',
+]);
+
+/** Finns det någon obekräftad uppgift som skulle kunna synas? */
+export const harObekraftadeUppgifter = (): boolean =>
+  LANSERINGSSPARRAR.some(([, bekraftad]) => !bekraftad);
+
+/**
+ * noindex så länge platshållare kan förekomma.
+ *
+ * Detta är backstoppet som INTE beror på miljövariabler och därför
+ * överlever varje felkonfiguration: skulle ett platshållarbygge mot
+ * förmodan publiceras kan det ändå inte indexeras. Cloudflares
+ * preview-deployer är publika som standard.
+ *
+ * Försvinner av sig själv den dag alla flaggor är vända.
+ */
+export const skaNoindexas = (): boolean => harObekraftadeUppgifter();
+
+/**
  * Vägrar bygga för produktion så länge något obekräftat fält skulle nå
  * publik. Samma princip som flaggorna, ett steg upp: en flagga är en
  * mänsklig handling, och ett bygge som vägrar är den handlingen på
- * systemnivå. Det finns ingen grafisk lösning på "sidans enda
- * konvertering saknas" — och varje grafisk lösning gör det lättare att
- * glömma.
+ * systemnivå.
  *
- * TILLAT_PLATSHALLARE=1 släpper igenom ett medvetet stagingbygge.
- * Sätt den aldrig i en deploy-pipeline mot produktion.
+ * Ärlig begränsning: Cloudflare injicerar CF_PAGES_BRANCH men deras docs
+ * säger uttryckligen "can be overridden". Någon med dashboard-åtkomst kan
+ * alltså överskriva den i production-scopet och lura grenkontrollen. Ingen
+ * env-baserad spärr är manipulationssäker mot dashboard-åtkomst. Syftet
+ * här är att eliminera OLYCKOR och göra ett kringgående till en medveten,
+ * i sig misstänkt handling. Det env-oberoende skyddet är skaNoindexas().
  */
 export const assertRedoForProduktion = (): void => {
-  if (!import.meta.env.PROD) return;
-  if (import.meta.env.TILLAT_PLATSHALLARE) return;
+  const kontext = byggkontext();
+
+  /*
+   * Kvarlämningsdetektor. TILLAT_PLATSHALLARE beviljar ingenting på
+   * Cloudflare — undantaget kommer från grennamnet. Hittas variabeln ändå
+   * i ett produktionsbygge har den nästan säkert hamnat i fel scope.
+   * Säg det rakt ut i stället för att tiga: Pass 3-commiten dokumenterar
+   * variabeln, så den som läser git-historiken är precis den som kan
+   * råka sätta den.
+   */
+  if (kontext === 'cf-produktion' && import.meta.env.TILLAT_PLATSHALLARE) {
+    throw new Error(
+      'TILLAT_PLATSHALLARE är satt i ett produktionsbygge ' +
+        `(CF_PAGES_BRANCH=${PRODUKTIONSGREN}).\n\n` +
+        'Den beviljar ingenting här och hör inte hemma i production-scopet.\n' +
+        'Ta bort den: Cloudflare > Settings > Variables and Secrets > Production.\n' +
+        'Preview-bygget behöver den inte — undantaget härleds ur grennamnet.\n',
+    );
+  }
+
+  if (TILLATER_PLATSHALLARE.has(kontext)) return;
 
   const kvar = LANSERINGSSPARRAR.filter(([, bekraftad]) => !bekraftad);
   if (kvar.length === 0) return;
@@ -123,11 +215,20 @@ export const assertRedoForProduktion = (): void => {
     .map(([flagga, , varfor]) => `  - ${flagga}: ${varfor}`)
     .join('\n');
 
+  const utvag =
+    kontext === 'cf-produktion'
+      ? `För en delbar förhandsvisning: pusha en gren som inte heter ${PRODUKTIONSGREN}.\n` +
+        'Cloudflare bygger den som preview automatiskt — ingen variabel behövs.\n'
+      : kontext === 'cf-okand-gren'
+        ? 'CF_PAGES är satt men CF_PAGES_BRANCH saknas, så bygget kan inte\n' +
+          'avgöra om detta är produktion. Spärren är fail-closed och vägrar.\n'
+        : 'För ett medvetet lokalt stagingbygge: TILLAT_PLATSHALLARE=1 npm run build\n';
+
   throw new Error(
-    `Produktionsbygge stoppat: ${kvar.length} obekräftad(e) uppgift(er) ` +
-      `skulle nå publik.\n\n${rader}\n\n` +
+    `Produktionsbygge stoppat (${kontext}): ${kvar.length} obekräftad(e) ` +
+      `uppgift(er) skulle nå publik.\n\n${rader}\n\n` +
       'Bekräfta uppgiften med kunden och vänd flaggan i src/data/company.ts.\n' +
-      'För ett medvetet stagingbygge: TILLAT_PLATSHALLARE=1 npm run build\n',
+      utvag,
   );
 };
 
