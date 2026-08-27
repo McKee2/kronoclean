@@ -110,6 +110,46 @@ const LANSERINGSSPARRAR: ReadonlyArray<readonly [string, boolean, string]> = [
  */
 const PRODUKTIONSGREN = 'main';
 
+/**
+ * Läser en miljövariabel vid byggtid.
+ *
+ * MÅSTE gå via process.env, inte import.meta.env. Vite ersätter
+ * `import.meta.env.X` STATISKT när modulen transformeras, och bundlern
+ * viker sedan ihop resultatet. Den första versionen av byggkontext()
+ * kompilerades bokstavligen till:
+ *
+ *     var byggkontext = () => { return "cf-produktion"; };
+ *
+ * — noll `import.meta.env` kvar i chunken. Värdet frystes alltså när
+ * modulen transformerades, inte när bygget kördes, vilket gjorde
+ * Cloudflare-detekteringen omöjlig att träffa och gav (lokal-produktion)
+ * i en skarp CF-körning.
+ *
+ * process.env rörs inte av Vite och läses i den Node-process som kör
+ * prerender-steget — den process som faktiskt ärver Cloudflares miljö.
+ * globalThis-omvägen finns för att slippa @types/node som beroende.
+ */
+const env = (namn: string): string | undefined => {
+  const p = (
+    globalThis as {
+      process?: { env?: Record<string, string | undefined> };
+    }
+  ).process;
+  const varde = p?.env?.[namn];
+  return varde === undefined || varde === '' ? undefined : varde;
+};
+
+/** Alla synliga CF_*- och CI-nycklar. Ren diagnostik för byggloggen. */
+const synligaPlattformsnycklar = (): string[] => {
+  const p = (
+    globalThis as { process?: { env?: Record<string, string | undefined> } }
+  ).process;
+  if (!p?.env) return [];
+  return Object.keys(p.env)
+    .filter((k) => k === 'CI' || k.startsWith('CF_'))
+    .sort();
+};
+
 type Byggkontext =
   | 'dev'
   | 'lokal-staging'
@@ -135,15 +175,23 @@ type Byggkontext =
  * vi inte med platshållare.
  */
 export const byggkontext = (): Byggkontext => {
+  // import.meta.env.PROD är avsiktligt kvar: den SKA vara kompiletidsvärde,
+  // eftersom den skiljer `astro dev` från `astro build`. Allt som beror på
+  // körmiljön går via env() ovan.
   if (!import.meta.env.PROD) return 'dev';
 
-  if (!import.meta.env.CF_PAGES) {
-    return import.meta.env.TILLAT_PLATSHALLARE
-      ? 'lokal-staging'
-      : 'lokal-produktion';
+  // CF_PAGES räcker inte ensamt som CF-signal — om Cloudflare av någon
+  // anledning inte sätter den ska CF_PAGES_BRANCH eller CF_PAGES_COMMIT_SHA
+  // ändå avslöja plattformen. Fler signaler, inte färre.
+  const gren = env('CF_PAGES_BRANCH');
+  const paCloudflare = Boolean(
+    env('CF_PAGES') ?? gren ?? env('CF_PAGES_COMMIT_SHA'),
+  );
+
+  if (!paCloudflare) {
+    return env('TILLAT_PLATSHALLARE') ? 'lokal-staging' : 'lokal-produktion';
   }
 
-  const gren = import.meta.env.CF_PAGES_BRANCH;
   if (!gren) return 'cf-okand-gren';
 
   return gren === PRODUKTIONSGREN ? 'cf-produktion' : 'cf-preview';
@@ -173,6 +221,43 @@ export const harObekraftadeUppgifter = (): boolean =>
 export const skaNoindexas = (): boolean => harObekraftadeUppgifter();
 
 /**
+ * Skriver byggkontexten till loggen.
+ *
+ * Ligger FÖRST i assertRedoForProduktion, före varje kastväg. Första
+ * versionen loggade i index.astro EFTER anropet till spärren, vilket
+ * betydde att raden aldrig syntes vid en vägran — alltså precis i det
+ * läge man behöver den. Diagnosen fick i stället göras på parentesen i
+ * felmeddelandet.
+ *
+ * Den tredje raden är den avgörande: den listar vilka CF_*- och
+ * CI-nycklar som faktiskt är synliga. Säger den "(inga)" sätter
+ * Cloudflare dem inte för byggsteget, och då är grennamnet inte en
+ * framkomlig signal.
+ */
+const loggaByggkontext = (kontext: Byggkontext): void => {
+  if (!import.meta.env.PROD) return;
+
+  const nycklar = synligaPlattformsnycklar();
+  const visa = (namn: string) => env(namn) ?? '(saknas)';
+
+  console.log(
+    `[nordclean] byggkontext=${kontext}` +
+      ` platshållare=${harObekraftadeUppgifter() ? 'ja' : 'nej'}` +
+      ` noindex=${skaNoindexas() ? 'ja' : 'nej'}`,
+  );
+  console.log(
+    `[nordclean] process.env: CF_PAGES=${visa('CF_PAGES')}` +
+      ` CF_PAGES_BRANCH=${visa('CF_PAGES_BRANCH')}` +
+      ` CF_PAGES_COMMIT_SHA=${env('CF_PAGES_COMMIT_SHA') ? 'satt' : '(saknas)'}` +
+      ` CI=${visa('CI')}`,
+  );
+  console.log(
+    `[nordclean] synliga CF_*/CI-nycklar: ` +
+      `${nycklar.length ? nycklar.join(', ') : '(inga)'}`,
+  );
+};
+
+/**
  * Vägrar bygga för produktion så länge något obekräftat fält skulle nå
  * publik. Samma princip som flaggorna, ett steg upp: en flagga är en
  * mänsklig handling, och ett bygge som vägrar är den handlingen på
@@ -188,6 +273,9 @@ export const skaNoindexas = (): boolean => harObekraftadeUppgifter();
 export const assertRedoForProduktion = (): void => {
   const kontext = byggkontext();
 
+  // Alltid först, före varje kastväg. Se loggaByggkontext ovan.
+  loggaByggkontext(kontext);
+
   /*
    * Kvarlämningsdetektor. TILLAT_PLATSHALLARE beviljar ingenting på
    * Cloudflare — undantaget kommer från grennamnet. Hittas variabeln ändå
@@ -196,7 +284,7 @@ export const assertRedoForProduktion = (): void => {
    * variabeln, så den som läser git-historiken är precis den som kan
    * råka sätta den.
    */
-  if (kontext === 'cf-produktion' && import.meta.env.TILLAT_PLATSHALLARE) {
+  if (kontext === 'cf-produktion' && env('TILLAT_PLATSHALLARE')) {
     throw new Error(
       'TILLAT_PLATSHALLARE är satt i ett produktionsbygge ' +
         `(CF_PAGES_BRANCH=${PRODUKTIONSGREN}).\n\n` +

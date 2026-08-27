@@ -8,7 +8,6 @@ import {
   ogImageUrl,
   buildStructuredData,
   assertRedoForProduktion,
-  byggkontext,
   skaNoindexas,
 } from '../data/company';
 
@@ -20,15 +19,6 @@ assertRedoForProduktion();
 // noindex så länge platshållare kan förekomma. Env-oberoende backstopp:
 // Cloudflares preview-deployer är publika som standard.
 const noindex = skaNoindexas();
-
-// En rad i byggloggen så att kontexten går att se i efterhand. Utan den
-// är det omöjligt att i Cloudflares logg avgöra varför ett bygge gick
-// igenom eller vägrade.
-if (import.meta.env.PROD) {
-  console.log(
-    `[nordclean] byggkontext=${byggkontext()} platshållare=${noindex ? 'ja' : 'nej'} noindex=${noindex ? 'ja' : 'nej'}`,
-  );
-}
 
 // Astro.site kommer från astro.config.mjs, Astro.url är den aktuella sidan.
 // Hårdkoda aldrig domänen här — den finns redan på ett ställe.
