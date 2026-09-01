@@ -2,66 +2,198 @@
 
 /**
  * Kronoclean designtokens.
- * Marinblå och ljusblå är avlästa ur loggan. Resten är byggt runt dem.
  *
- * Omräknade 2026-09-01 mot den nya loggan. Avläsningen är inte en
- * pipettklick på en pixel utan en viktad centroid i LINJÄRT ljus över
- * filens 372 952 opaka pixlar, delade på OKLab-ljushet i en mörk och en
- * ljus familj (44.8 % respektive 33.1 % av bläcket). Att vikta i sRGB
- * hade dragit centroiden för mörkt — sRGB är gammakodat, och medelvärdet
- * av två sRGB-tal är inte färgen mitt emellan dem.
+ * ==================================================================
+ * TVÅ LAGER, OCH VARFÖR GRÄNSEN MELLAN DEM ÄR MEKANISK
+ * ==================================================================
  *
- * navy och sky är efter det RIKTIGA pixelvärden ur filen, inte
- * approximationer: närmaste faktiska pixel ligger på ΔRGB 0.0 från båda.
+ * LAGER 1, PALETTEN, ligger i ett vanligt :root och har prefixet
+ * --palett-. Rena färger utan uppgift.
  *
- * Skillnaden mot förra loggan är kroma, inte ljushet. navy står kvar på
- * samma OKL (0.335 -> 0.324) men har dubbla kromat (0.075 -> 0.155).
- * Sky-familjen är både ljusare och mättare.
+ * LAGER 2, YTORNA, ligger i @theme och heter --color-pa-<yta>-<roll>.
+ * Det är det enda lagret markup får röra.
  *
- * Kontrastvärdena i kommentarerna är uträknade, inte uppskattade: sRGB
- * relativ luminans enligt WCAG 2.x, verifierade två oberoende vägar
- * (hex-komposit och oklab->sRGB med rundtrippskontroll). De mäts mot
- * mist, inte mot vitt: mist är sidbakgrunden och ger ALLTID det lägre
- * talet, så klarar en token mist klarar den korten också.
+ * Paletten ligger AVSIKTLIGT utanför @theme. Tailwind genererar
+ * utilities ur @theme, så en färg som ligger där går att skriva som
+ * text-navy i markup. Ligger den i :root finns ingen sådan klass, och
+ * då kan ingen råka måla en rubrik med en färg som inte är uträknad mot
+ * den yta rubriken faktiskt står på. Lagerdelningen är alltså inte en
+ * konvention man ska komma ihåg — den är omöjlig att kringgå.
  *
- * REGEL: en färgtoken vars namn inte säger "text" är inte godkänd för
- * liten text. Liten text = under 24px normal eller under 18.66px fet.
+ * @theme static, inte @theme: Tailwind PRUNAR oanvända temavariabler.
+ * Mätt i dist/_astro/index.*.css före den här ändringen — --color-navy-deep
+ * och --color-sky-soft stod i källan men saknades helt i utdatan, för att
+ * ingen utility använde dem. Med var()-indirektion hade ytans tokens
+ * alltså kunnat peka på en variabel som inte finns, och färgen tyst
+ * blivit ogiltig. Nyckelordet static tvingar ut alla variabler.
+ * Klasserna genereras fortfarande bara vid användning, inget bloat.
+ *
+ * ==================================================================
+ * SJU ROLLER PER YTA
+ * ==================================================================
+ *
+ *   rubrik         stor text                  >= 3.0
+ *   brod           brödtext, liten text       >= 5.0  (4.5 + 0.5)
+ *   accent         stor text, emfas, ramar    >= 3.0
+ *   accent-liten   accentfärgad LITEN text    >= 5.0
+ *   linje          avdelare, ren dekor        mål ~1.30 ljus, ~1.55 mörk
+ *   ikon           ikonstreck                 >= 3.0
+ *   fokus          fokusring                  >= 3.0
+ *
+ * accent-liten är den sjunde rollen och den enda som inte stod i
+ * beställningen. Den måste finnas: accent är uträknad mot 3.0 och faller
+ * som liten text. Hero-taglinen ÄR accentfärgad liten text, så utan
+ * rollen hade den antingen fått fel färg eller tvingat accent ned till
+ * 5.0 och därmed gjort accenten mörkare än loggan på varje ikon och ram.
+ * Samma uppdelning som sky/sky-text hade förut, med ytan utskriven.
+ *
+ * ==================================================================
+ * KONTRASTTALEN
+ * ==================================================================
+ *
+ * Uträknade, inte uppskattade: sRGB relativ luminans enligt WCAG 2.x.
+ * Varje tal är mätt mot SIN EGEN YTA, inte mot mist. Det var hela
+ * poängen med arbetet — slate och sky-text var uträknade mot mist och
+ * faller mot navy (1.9 respektive 1.4).
+ *
+ *                 mist #E1EEFE   vitt #FFFFFF   navy #00156D
+ *   rubrik           11.02          12.96          15.81
+ *   brod              5.53           6.50           9.11
+ *   accent            3.26           3.83           6.38
+ *   accent-liten      5.24           6.16           6.38
+ *   linje             1.297          1.323          1.551
+ *   ikon              3.26           3.83           6.38
+ *   fokus             5.24           5.97          15.81
+ *
+ * Ytbytena, mätta som ΔE i OKLab (stor yta, hård kant):
+ *   mist -> vitt   ΔE 0.0615   kvot 1.176
+ *   mist -> navy   ΔE 0.6888   kvot 13.45
+ *   vitt -> navy   ΔE 0.7484   kvot 15.81
+ * Gamla misten gav ΔE 0.0371 mot vitt. Kandidat B gör steget 66 % större,
+ * och 0.0615 ligger klart över de ~0.02 som krävs för att en stor yta ska
+ * läsas som en annan yta.
+ *
+ * ==================================================================
+ * REGELN
+ * ==================================================================
+ * Skriv aldrig en färgklass vars namn inte innehåller ytan den står på.
+ * Finns ingen passande roll är svaret att räkna fram en, inte att låna
+ * en från en annan yta.
  */
-@theme {
-  /* Ur loggan, bokstavligt. Ändra bara om loggan ändras. */
-  --color-navy: #002881; /* mist 11.69 · vitt 12.96 — OKLCh 0.324/0.155/262 */
-  --color-sky: #0083ee; /* mist 3.46 · vitt 3.83 — ikoner, ramar, hover, STOR text */
 
-  /* Härledda */
-  --color-navy-deep: #00156d; /* mist 14.26 — även denna en faktisk pixel */
-  --color-sky-soft: #dcf2ff;
-  --color-mist: #EEF4F9;
-  --color-ink: #18243b; /* mist 13.99 · vitt 15.51 */
-  --color-line: #cbe3f7; /* mist 1.19 · vitt 1.32 — dekorativ avdelare, ej UI-gräns */
+/* ------------------------------------------------------------------ */
+/* LAGER 1 — PALETTEN. Genererar avsiktligt inga utilities.            */
+/* ------------------------------------------------------------------ */
+:root {
+  /* Ur loggan, bokstavliga pixelvärden (ΔRGB 0.0 mot närmaste pixel). */
+  --palett-navy: #002881;
+  --palett-navy-deep: #00156d;
+  --palett-sky: #0083ee;
 
-  /**
-   * Textsäkra tokens. Båda klarar 4.5:1 mot BÅDE mist och vitt, så de
-   * kan inte bli ogiltiga beroende på vilket underlag de hamnar på.
-   * Framräknade i OKLCh med bevarad ton — samma kulör, lägre ljushet.
-   *
-   * Marginalen är avsiktlig och ska inte ätas upp: kravet är 4.5, golvet
-   * här är 4.8. En token som landar på 4.51 är formellt godkänd och i
-   * praktiken en avrundning från underkänd.
-   */
-  --color-sky-text: #006bb5; /* mist 5.02 · vitt 5.57 — sky mörkad för liten text */
-  --color-slate: #5d677b; /* mist 5.13 · vitt 5.69 — brödtext och sekundärtext */
+  /* Härledda i OKLCh med bevarad ton. */
+  --palett-sky-text: #0462b4; /* sky mörkad för liten text på ljus yta */
+  --palett-sky-lyft: #66a8f4; /* sky lyft för mörk yta — spegelbilden */
+  --palett-slate: #555e72; /* brödtext på ljus yta */
+  --palett-frost: #b0c7e1; /* brödtext på mörk yta, slates motsvarighet */
+  --palett-ink: #18243b;
 
-  /**
-   * Ren dekoration. Platt värde i stället för opacitetsmodifierare, av
-   * samma skäl som förut: en opacitetsmodifierare gör den faktiska
-   * färgen beroende av vad som råkar ligga bakom.
-   * aria-hidden-grafik undantas av WCAG 1.4.11. Använd aldrig till text.
-   */
-  --color-sky-wash: #acd8f8; /* mist 1.36 · vitt 1.51 */
+  /* Ytorna själva. */
+  --palett-mist: #e1eefe;
+  --palett-vit: #ffffff;
+
+  /* Avdelare, en per yta. Samma optiska tyngd på alla tre: en linje som
+     är knappt synlig på mist blir påträngande på navy och tvärtom. */
+  --palett-linje-mist: #b8d4f5;
+  --palett-linje-vit: #cbe3f7;
+  --palett-linje-navy: #263f77;
+}
+
+@theme static {
+  /* ---------------------------------------------------------------- */
+  /* YTA MIST — grundytan. Hero, Tjänster, Områden, Vanliga frågor.    */
+  /* ---------------------------------------------------------------- */
+  --color-pa-mist-rubrik: var(--palett-navy); /* 11.02 */
+  --color-pa-mist-brod: var(--palett-slate); /* 5.53 */
+  --color-pa-mist-accent: var(--palett-sky); /* 3.26 */
+  --color-pa-mist-accent-liten: var(--palett-sky-text); /* 5.24 */
+  --color-pa-mist-linje: var(--palett-linje-mist); /* 1.297 */
+  --color-pa-mist-ikon: var(--palett-sky); /* 3.26 */
+  --color-pa-mist-fokus: var(--palett-sky-text); /* 5.24 */
+
+  /* ---------------------------------------------------------------- */
+  /* YTA VITT — korten, och blocket Så går det till + Priser.          */
+  /* ---------------------------------------------------------------- */
+  /* Samma värden som mist, och det är ett BESLUT, inte en slump: mist är
+     den svårare av de två ljusa ytorna, så en token som klarar mist
+     klarar vitt med marginal. Att peka hit i stället för att upprepa
+     hexvärdet ger en enda sanningskälla — ändras mist-tokenen följer
+     vitt-tokenen med i stället för att tyst hamna på fel sida kravet. */
+  --color-pa-vitt-rubrik: var(--color-pa-mist-rubrik); /* 12.96 */
+  --color-pa-vitt-brod: var(--color-pa-mist-brod); /* 6.50 */
+  --color-pa-vitt-accent: var(--color-pa-mist-accent); /* 3.83 */
+  --color-pa-vitt-accent-liten: var(--color-pa-mist-accent-liten); /* 6.16 */
+  --color-pa-vitt-ikon: var(--color-pa-mist-ikon); /* 3.83 */
+  --color-pa-vitt-fokus: var(--color-pa-mist-fokus); /* 5.97 */
+  /* Avdelaren är den enda som inte kan delas: --palett-linje-mist ger
+     1.53 på vitt och läser då som en ram, inte som en avdelare. */
+  --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.323 */
+
+  /* ---------------------------------------------------------------- */
+  /* YTA NAVY — avslutningsblocket: Kontakt + Footer.                  */
+  /* ---------------------------------------------------------------- */
+  /* Inget här kan lånas från de ljusa ytorna. Hela uppsättningen är
+     framräknad separat, i skys och navys egna toner. */
+  --color-pa-navy-rubrik: var(--palett-vit); /* 15.81 */
+  --color-pa-navy-brod: var(--palett-frost); /* 9.11 */
+  --color-pa-navy-accent: var(--palett-sky-lyft); /* 6.38 */
+  --color-pa-navy-accent-liten: var(--palett-sky-lyft); /* 6.38 */
+  --color-pa-navy-linje: var(--palett-linje-navy); /* 1.551 */
+  --color-pa-navy-ikon: var(--palett-sky-lyft); /* 6.38 */
+  /* Vit fokusring på mörk yta. sky-lyft hade räckt (6.38), men en
+     fokusring ska vara det mest synliga på skärmen, inte precis
+     godkänd. */
+  --color-pa-navy-fokus: var(--palett-vit); /* 15.81 */
+
+  /* ---------------------------------------------------------------- */
+  /* Ytlös dekor.                                                      */
+  /* ---------------------------------------------------------------- */
+  /* Står utanför ytsystemet med flit. Detta är fyllnadsgrafik i
+     platshållare, alltid aria-hidden, och har ingen kontrastgräns att
+     klara — WCAG 1.4.11 undantar den. Den ska vara tyst, och en roll i
+     ytsystemet hade tvingat upp den till 3.0 och gjort en platshållare
+     till sidans starkaste element. */
+  --color-dekor-wash: #acd8f8;
 
   /* Typografi — serif i rubriker, humanistisk sans i brödtext */
   --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-sans: "Karla", system-ui, -apple-system, sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/* YTKLASSERNA                                                         */
+/* ------------------------------------------------------------------ */
+/**
+ * En sektion deklarerar sin yta med en klass, och klassen gör två saker:
+ * sätter bakgrunden och sätter fokusringens färg för allt inuti.
+ *
+ * Fokusringen kan inte vara en utility — den bor i en :focus-visible-
+ * regel som gäller hela dokumentet. Den läses därför ur --fokusring, som
+ * ärvs nedåt i trädet. Varje ytklass sätter om den, så en länk djupt inne
+ * i en mörk sektion får rätt ring utan att någon behöver komma ihåg det.
+ */
+.yta-mist {
+  background: var(--palett-mist);
+  --fokusring: var(--color-pa-mist-fokus);
+}
+
+.yta-vit {
+  background: var(--palett-vit);
+  --fokusring: var(--color-pa-vitt-fokus);
+}
+
+.yta-navy {
+  background: var(--palett-navy-deep);
+  --fokusring: var(--color-pa-navy-fokus);
 }
 
 html {
@@ -75,18 +207,20 @@ html {
 }
 
 /**
- * Sidbakgrunden är mist, inte vitt. Vitt sparas till kort och ytor
- * som ska lyfta ur bakgrunden.
+ * Sidbakgrunden är mist. Sektionerna målar sin egen yta ovanpå, men det
+ * som ligger utanför dem — överskrollen högst upp och under sista
+ * sektionen — behöver också en färg.
  */
 body {
   font-family: var(--font-sans);
-  color: var(--color-ink);
-  background: var(--color-mist);
+  color: var(--palett-ink);
+  background: var(--palett-mist);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Synlig tangentbordsfokus överallt — inte bara vid musinteraktion */
+/* Synlig tangentbordsfokus överallt — inte bara vid musinteraktion.
+   Fallbacken gäller det som ligger utanför varje ytklass. */
 :focus-visible {
-  outline: 2px solid var(--color-sky);
+  outline: 2px solid var(--fokusring, var(--color-pa-mist-fokus));
   outline-offset: 3px;
 }

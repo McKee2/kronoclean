@@ -513,8 +513,9 @@ export const SEO = {
   description:
     'Hemstädning i Växjö med RUT-avdrag. Familjeföretag med flera städare — blir någon sjuk kommer någon annan. Ring för bokning.',
   locale: 'sv_SE',
-  /** Matchar --color-mist i global.css så webbläsarfältet smälter in. */
-  themeColor: '#EEF4F9',
+  /** Matchar --palett-mist i global.css så webbläsarfältet smälter in.
+   *  Följer alltid med när mist ändras — annars ljuger adressfältet. */
+  themeColor: '#E1EEFE',
   logoPath: '/kronoclean-logo.webp',
   ogImagePath: '/og-kronoclean.jpg',
   ogImageAlt: 'Kronoclean — hemstädning i Växjö',

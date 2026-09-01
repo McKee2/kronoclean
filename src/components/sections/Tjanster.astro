@@ -47,18 +47,18 @@ const grupper = ORDNING.map((id) => ({
   Att grupperna blir 3 och 2 kort breda faller ur datan av sig själv och
   förstärker uppdelningen utan att någon bestämt det i markup.
 */}
-<section class="pb-20 lg:pb-28" aria-labelledby="tjanster-privat">
+<section class="yta-mist pt-20 pb-20 lg:pt-28 lg:pb-28" aria-labelledby="tjanster-privat">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
     {
       grupper.map((grupp, i) => (
-        <div class={i > 0 ? 'mt-16 border-t border-line pt-16 lg:mt-20 lg:pt-20' : ''}>
+        <div class={i > 0 ? 'mt-16 border-t border-pa-mist-linje pt-16 lg:mt-20 lg:pt-20' : ''}>
           <h2
             id={`tjanster-${grupp.segment.id}`}
-            class="font-display text-3xl text-navy sm:text-4xl"
+            class="font-display text-3xl text-pa-mist-rubrik sm:text-4xl"
           >
             {grupp.segment.label}
           </h2>
-          <p class="mt-2 font-sans text-sm text-slate">{grupp.villkor}</p>
+          <p class="mt-2 font-sans text-sm text-pa-mist-brod">{grupp.villkor}</p>
 
           <ul class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {grupp.tjanster.map((tjanst) => (
@@ -81,11 +81,11 @@ const grupper = ORDNING.map((id) => ({
                 <div class="tjanst-kort">
                   <TjanstIkon
                     slug={tjanst.slug}
-                    class="mb-4 h-7 w-7 shrink-0 text-sky"
+                    class="mb-4 h-7 w-7 shrink-0 text-pa-vitt-ikon"
                   />
-                  <h3 class="font-display text-xl text-navy">{tjanst.name}</h3>
+                  <h3 class="font-display text-xl text-pa-vitt-rubrik">{tjanst.name}</h3>
                   {'blurb' in tjanst && (
-                    <p class="mt-2 font-sans text-sm leading-relaxed text-slate">
+                    <p class="mt-2 font-sans text-sm leading-relaxed text-pa-vitt-brod">
                       {tjanst.blurb}
                     </p>
                   )}
@@ -108,8 +108,8 @@ const grupper = ORDNING.map((id) => ({
     height: 100%;
     flex-direction: column;
     border-radius: 1rem;
-    border: 1px solid var(--color-line);
-    background: #fff;
+    border: 1px solid var(--color-pa-vitt-linje);
+    background: var(--palett-vit);
     padding: 1.5rem;
   }
 
@@ -132,7 +132,7 @@ const grupper = ORDNING.map((id) => ({
 
   a.tjanst-kort:hover,
   a.tjanst-kort:focus-visible {
-    border-color: var(--color-sky);
+    border-color: var(--color-pa-vitt-accent);
     box-shadow:
       0 1px 3px rgba(0, 40, 129, 0.04),
       0 12px 32px -12px rgba(0, 40, 129, 0.14);
