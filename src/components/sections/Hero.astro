@@ -8,7 +8,13 @@ import {
   responsePromise,
 } from '../../data/company';
 
-const markers = trustMarkers();
+/**
+ * 'privat' eftersom heron leder med hemstädning. Argumentet är
+ * obligatoriskt just för att det här valet ska stå skrivet och inte
+ * ärvas tyst — RUT gäller inte kontors- och hotellstädning längre ned
+ * på sidan.
+ */
+const markers = trustMarkers('privat');
 
 /**
  * Spärrade läsare. Returnerar null så länge uppgiften är obekräftad, så

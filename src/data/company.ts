@@ -328,14 +328,36 @@ export const assertRedoForProduktion = (): void => {
   );
 };
 
-/** Byggs av hasFTax/hasInsurance så inget osant kan hamna på sidan. */
-export const trustMarkers = (): string[] => {
+/**
+ * Byggs av hasFTax/hasInsurance så inget osant kan hamna på sidan.
+ *
+ * `segment` är OBLIGATORISKT och har medvetet inget standardvärde. RUT
+ * lades tidigare på ovillkorligt, vilket var sant så länge sidan bara
+ * sålde hemstädning. Med kontors- och hotellstädning på samma sida är
+ * "50 % RUT-avdrag" bredvid en företagstjänst helt enkelt fel — RUT
+ * följer köparen, och ett företag är inte en fysisk person med skatt att
+ * dra av. Ett defaultvärde hade gjort felet tyst; ett obligatoriskt
+ * argument tvingar varje anropsplats att svara på vem markörerna gäller.
+ *
+ * F-skatt och försäkring gäller båda segmenten och är därför ogatade.
+ */
+export const trustMarkers = (segment: SegmentId): string[] => {
   const markers: string[] = [];
   if (COMPANY.hasFTax) markers.push('F-skatt');
   if (COMPANY.hasInsurance) markers.push('Ansvarsförsäkrad');
-  markers.push(`${COMPANY.rutPercent} % RUT-avdrag`);
+  if (SEGMENT[segment].rut) markers.push(`${COMPANY.rutPercent} % RUT-avdrag`);
   return markers;
 };
+
+/**
+ * Prislogiken i en rad, för segmentrubriken i tjänstesektionen. Härledd
+ * ur SEGMENT.rut av samma skäl som trustMarkers: står den som fri text i
+ * markup kan den bli kvar när flaggan ändras.
+ */
+export const segmentVillkor = (segment: SegmentId): string =>
+  SEGMENT[segment].rut
+    ? `${COMPANY.rutPercent} % RUT-avdrag på arbetskostnaden`
+    : 'Faktureras företag. RUT gäller bara privatpersoner.';
 
 /**
  * Spärrade läsare. Returtypen är explicit `string | null` — utan den
@@ -415,11 +437,13 @@ export const SERVICES = [
     slug: 'hemstadning',
     name: 'Hemstädning',
     segment: 'privat',
+    blurb: 'Regelbunden städning av hela hemmet — kök, badrum, golv och ytor.',
   },
   {
     slug: 'flyttstadning',
     name: 'Flyttstädning',
     segment: 'privat',
+    blurb: 'Hela bostaden städad till besiktningsstandard när du flyttar ut.',
   },
   {
     slug: 'dodsbostadning',
@@ -433,16 +457,24 @@ export const SERVICES = [
      * stället för att ärva standardtonen av misstag.
      */
     varsamTon: true,
+    /**
+     * blurb saknas AVSIKTLIGT. Kortet renderar namn och ikon utan
+     * beskrivning tills texten är skriven för hand i rätt register.
+     * Skriv aldrig en platshållarrad här "så länge" — en mening i fel
+     * ton på just den här tjänsten kostar mer än ingen mening alls.
+     */
   },
   {
     slug: 'kontorsstadning',
     name: 'Kontorsstädning',
     segment: 'foretag',
+    blurb: 'Kontor, mötesrum och personalutrymmen på fasta tider.',
   },
   {
     slug: 'hotellstadning',
     name: 'Hotellstädning',
     segment: 'foretag',
+    blurb: 'Rumsstädning, linnebyte och gemensamma ytor.',
   },
 ] as const;
 

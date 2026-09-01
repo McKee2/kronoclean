@@ -1,0 +1,146 @@
+---
+import {
+  SEGMENT,
+  servicesIn,
+  segmentVillkor,
+  type SegmentId,
+} from '../../data/company';
+import TjanstIkon from '../TjanstIkon.astro';
+
+/**
+ * Ordningen kommer ur datafilen, inte härifrån. Privat först eftersom det
+ * är affären heron leder med.
+ */
+const ORDNING: SegmentId[] = ['privat', 'foretag'];
+
+const grupper = ORDNING.map((id) => ({
+  segment: SEGMENT[id],
+  villkor: segmentVillkor(id),
+  tjanster: servicesIn(id),
+}));
+---
+
+{/*
+  SEGMENTERINGEN: två rubriker, inte två kortutseenden.
+
+  Skillnaden mellan privat och företag är VEM som köper, inte hur bra
+  tjänsten är. Ger man de två grupperna olika kortbehandling — den ena
+  vit och upphöjd, den andra flat — säger layouten att den ena är
+  huvudsaken och den andra en bihang. Det är en rangordning sidan inte
+  har täckning för: kontors- och hotellstädning är två av fem tjänster
+  och den återkommande företagsintäkten.
+
+  En rubrik gör tre saker en avdelarlinje inte gör:
+    1. Den säger VAD grupperingen betyder. En linje säger bara "här är
+       ett hopp" och läsaren får gissa varför.
+    2. Den är ett landmärke. En skärmläsare kan hoppa mellan h2:orna och
+       får rubriklistan "För dig hemma / För företag"; en <hr> eller en
+       border-top hörs inte alls.
+    3. Den bär prisvillkoret. RUT respektive fakturering hör till
+       gruppen, inte till varje kort — skrivet en gång per grupp i
+       stället för tre gånger i korten.
+
+  Avdelaren finns ändå, men som stöd åt rubriken och inte i stället för
+  den: border-t på företagsgruppen, samma idiom som förtroendemarkörerna
+  i heron redan använder.
+
+  Att grupperna blir 3 och 2 kort breda faller ur datan av sig själv och
+  förstärker uppdelningen utan att någon bestämt det i markup.
+*/}
+<section class="pb-20 lg:pb-28" aria-labelledby="tjanster-privat">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    {
+      grupper.map((grupp, i) => (
+        <div class={i > 0 ? 'mt-16 border-t border-line pt-16 lg:mt-20 lg:pt-20' : ''}>
+          <h2
+            id={`tjanster-${grupp.segment.id}`}
+            class="font-display text-3xl text-navy sm:text-4xl"
+          >
+            {grupp.segment.label}
+          </h2>
+          <p class="mt-2 font-sans text-sm text-slate">{grupp.villkor}</p>
+
+          <ul class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {grupp.tjanster.map((tjanst) => (
+              <li>
+                {/*
+                  Kortet är en <div> i dag för att /tjanster/<slug> inte
+                  finns än. Bytet till länk är EN rad:
+
+                    <a class="tjanst-kort" href={servicePath(tjanst)}>
+
+                  Inget annat behöver röras. Det håller för att
+                    - all layout ligger på .tjanst-kort, som är samma
+                      klass på båda elementen,
+                    - h3 och p är giltigt innehåll inuti en <a>,
+                    - inget inuti kortet är interaktivt, så en länk runt
+                      alltihop skapar ingen nästlad träffyta,
+                    - hovertillståndet är knutet till a.tjanst-kort i
+                      stilblocket nedan och tänds därför av sig självt.
+                */}
+                <div class="tjanst-kort">
+                  <TjanstIkon
+                    slug={tjanst.slug}
+                    class="mb-4 h-7 w-7 shrink-0 text-sky"
+                  />
+                  <h3 class="font-display text-xl text-navy">{tjanst.name}</h3>
+                  {'blurb' in tjanst && (
+                    <p class="mt-2 font-sans text-sm leading-relaxed text-slate">
+                      {tjanst.blurb}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  /* Kortets utseende. h-full + flex-col så alla kort i en rad blir lika
+     höga — det är vad som gör att dödsbostädningens saknade rad läser som
+     avsiktligt luft i stället för som ett trasigt kort. */
+  .tjanst-kort {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border-radius: 1rem;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    padding: 1.5rem;
+  }
+
+  /*
+    HOVER OCH FOKUS ÄR KNUTNA TILL a.tjanst-kort, INTE TILL .tjanst-kort.
+
+    Det är hela poängen med konstruktionen. Ett kort som lyser upp när
+    muspekaren passerar är ett löfte om att det går att klicka på. I dag
+    går det inte, så regeln får inte träffa. Den dagen <div> byts mot <a>
+    börjar den gälla utan att en enda klass läggs till — och lika viktigt:
+    ingen kan råka lämna kvar ett hovertillstånd på ett kort som aldrig
+    blev en länk.
+  */
+  a.tjanst-kort {
+    text-decoration: none;
+    transition:
+      border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  a.tjanst-kort:hover,
+  a.tjanst-kort:focus-visible {
+    border-color: var(--color-sky);
+    box-shadow:
+      0 1px 3px rgba(0, 40, 129, 0.04),
+      0 12px 32px -12px rgba(0, 40, 129, 0.14);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a.tjanst-kort {
+      transition: none;
+    }
+  }
+</style>
