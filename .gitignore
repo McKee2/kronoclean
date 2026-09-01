@@ -3,6 +3,12 @@ dist/
 # generated types
 .astro/
 
+# wrangler-cache och lokal state. Skapas av wrangler-kommandon.
+# Ligger har med FLIT: byggloggen visade att wrangler annars lagger till
+# den sjalv, och en autogenererad .gitignore-rad ar en andring vi inte
+# gjort och inte granskat.
+.wrangler/
+
 # dependencies
 node_modules/
 

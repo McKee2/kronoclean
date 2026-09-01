@@ -1,0 +1,75 @@
+// Kronoclean — Cloudflare Workers, static assets.
+//
+// ═══════════════════════════════════════════════════════════════════
+// VARFÖR DEN HÄR FILEN FINNS
+// ═══════════════════════════════════════════════════════════════════
+//
+// Den finns för att STOPPA något, inte för att slå på något.
+//
+// Cloudflares dokumentation säger det rakt ut: kör man `wrangler deploy`
+// utan konfigurationsfil upptäcker wrangler ramverket och genererar
+// konfigurationen själv — inklusive adapterinstallation. Det är precis
+// vad som hände i byggloggen: wrangler körde `astro add cloudflare` på
+// egen hand och ändrade .gitignore i byggcontainern.
+//
+// Autoconfig triggas av att konfiguration SAKNAS. Finns den behöver den
+// inte köra. Det är hela funktionen den här filen fyller.
+//
+// ═══════════════════════════════════════════════════════════════════
+// ADAPTERN FÅR INTE IN, OCH DET ÄR INTE EN SMAKFRÅGA
+// ═══════════════════════════════════════════════════════════════════
+//
+// @astrojs/cloudflare byter Astro från static till server-utdata. Hela
+// sanningsspärren bygger på att assertRedoForProduktion() körs vid
+// BYGGTID under prerendern och får bygget att misslyckas när ett
+// obekräftat fält skulle nå publik.
+//
+// Blir en sida on-demand-renderad flyttar spärren till REQUESTTID. Då
+// kastar den inte längre mot en byggpipeline utan mot en besökare:
+// sidan kraschar för kunden i stället för att bygget vägrar. Det vänder
+// spärren från ett skydd till ett fel, och det skulle ske tyst.
+//
+// Astro prerenderar allt som standard och behöver ingen adapter för en
+// statisk sajt — Cloudflares egen Astro-guide säger samma sak. Det
+// finns alltså ingenting att vinna och en spärr att förlora.
+//
+// Kontrollera vid varje ändring: astro.config.mjs ska sakna både
+// `output` och `adapter`, och package.json ska sakna
+// @astrojs/cloudflare.
+{
+  // ⚠ MÅSTE MATCHA det befintliga Workers-projektets namn i
+  //   dashboarden. `wrangler deploy` deployar till den Worker som heter
+  //   det som står här — står fel namn skapas en NY Worker och den
+  //   gamla lämnas kvar och kör vidare på sitt gamla innehåll.
+  //   Verifiera i Workers & Pages innan första bygget.
+  "name": "kronoclean",
+
+  // Sätt vid införandet, inte "senaste". Ett fast datum gör att
+  // runtime-beteendet inte kan ändras under fötterna på oss vid ett
+  // bygge vi inte gjort om.
+  "compatibility_date": "2026-09-01",
+
+  "assets": {
+    // Astros default-utdata. Ingen outDir är satt i astro.config.mjs,
+    // så den här strängen och Astro får inte glida isär.
+    "directory": "./dist",
+
+    // Individuella filer serveras utan avslutande snedstreck,
+    // mappindex med. Det är Cloudflares default och rekommendation för
+    // prerenderade sajter — utskrivet här så nästa läsare slipper slå
+    // upp vad som gäller.
+    "html_handling": "auto-trailing-slash",
+
+    // Serverar närmaste 404.html med status 404 i stället för ett tomt
+    // svar. OBS: sajten har ingen src/pages/404.astro än, så det finns
+    // ingen 404.html i dist och inställningen är verkningslös i dag.
+    // Den står här för att den ska börja gälla av sig själv den dag en
+    // 404-sida läggs till, i stället för att glömmas bort då.
+    //
+    // Den får INTE vara "single-page-application": sajten är
+    // flersidig-prerenderad, och SPA-läget hade serverat index.html med
+    // status 200 för varje okänd URL. Då blir varje felstavad adress en
+    // kopia av startsidan som Google kan indexera.
+    "not_found_handling": "404-page"
+  }
+}
