@@ -239,14 +239,24 @@ const env = (namn: string): string | undefined => {
   return varde === undefined || varde === '' ? undefined : varde;
 };
 
-/** Alla synliga CF_*- och CI-nycklar. Ren diagnostik för byggloggen. */
+/**
+ * Alla synliga plattformsnycklar. Ren diagnostik för byggloggen.
+ *
+ * Täcker BÅDA Cloudflare-produkterna. Pages sätter CF_PAGES*, Workers
+ * Builds sätter WORKERS_CI*. Filtrerar den här bara på det ena prefixet
+ * rapporterar loggen "(inga)" på den andra plattformen, och då ser det ut
+ * som att Cloudflare inte sätter något alls — vilket var precis den
+ * slutsats som ledde fel förra gången.
+ */
 const synligaPlattformsnycklar = (): string[] => {
   const p = (
     globalThis as { process?: { env?: Record<string, string | undefined> } }
   ).process;
   if (!p?.env) return [];
   return Object.keys(p.env)
-    .filter((k) => k === 'CI' || k.startsWith('CF_'))
+    .filter(
+      (k) => k === 'CI' || k.startsWith('CF_') || k.startsWith('WORKERS_CI'),
+    )
     .sort();
 };
 
@@ -268,8 +278,27 @@ type Byggkontext =
  *
  * Mätt, inte gissat: import.meta.env.PROD är true även på en preview-gren
  * (PROD skiljer på `astro dev` och `astro build`, inte på preview och
- * produktion), så PROD ensamt kan inte avgöra frågan. CF_PAGES,
- * CF_PAGES_BRANCH, CF_PAGES_URL och CI når koden vid byggtid som strängar.
+ * produktion), så PROD ensamt kan inte avgöra frågan.
+ *
+ * TVÅ VARIABELUPPSÄTTNINGAR, EN LOGIK.
+ *
+ * Cloudflare har två produkter som bygger ur git, och de sätter olika
+ * miljövariabler:
+ *
+ *   Pages           CF_PAGES, CF_PAGES_BRANCH, CF_PAGES_COMMIT_SHA
+ *   Workers Builds  WORKERS_CI, WORKERS_CI_BRANCH, WORKERS_CI_COMMIT_SHA
+ *
+ * Funktionen letade tidigare bara efter CF_PAGES*. Under Workers Builds
+ * fanns ingen av dem, paCloudflare blev false, och bygget föll igenom
+ * till 'lokal-produktion' och vägrade. Spärren gjorde alltså rätt — den
+ * såg ingen känd plattform och antog produktion — men diagnosen såg ut
+ * som ett fel i Cloudflare i stället för som en lucka här.
+ *
+ * Grenlogiken och fail-closed-beteendet är OFÖRÄNDRADE. Det enda som
+ * ändras är vilka nycklar som räknas som "vi står på Cloudflare".
+ * Kontextnamnen behåller cf-prefixet med flit: de beskriver byggets
+ * NATUR — preview, produktion, okänd gren — inte vilken produkt som
+ * kördes. Vilken produkt det var syns i byggloggen i stället.
  *
  * Okänd gren på Cloudflare är fail-closed: vet vi inte var vi är, bygger
  * vi inte med platshållare.
@@ -280,12 +309,21 @@ export const byggkontext = (): Byggkontext => {
   // körmiljön går via env() ovan.
   if (!import.meta.env.PROD) return 'dev';
 
-  // CF_PAGES räcker inte ensamt som CF-signal — om Cloudflare av någon
-  // anledning inte sätter den ska CF_PAGES_BRANCH eller CF_PAGES_COMMIT_SHA
-  // ändå avslöja plattformen. Fler signaler, inte färre.
-  const gren = env('CF_PAGES_BRANCH');
+  // Grennamnet, från vilken av produkterna som än kör. Pages först bara
+  // för att den uppsättningen fanns här först — ordningen har ingen
+  // betydelse, de kan inte båda vara satta.
+  const gren = env('CF_PAGES_BRANCH') ?? env('WORKERS_CI_BRANCH');
+
+  // Ingen enskild nyckel räcker som plattformssignal. Sätter Cloudflare
+  // av någon anledning inte flaggan ska grennamnet eller commit-hashen
+  // ändå avslöja var vi är. Fler signaler, inte färre — och nu från båda
+  // produkterna.
   const paCloudflare = Boolean(
-    env('CF_PAGES') ?? gren ?? env('CF_PAGES_COMMIT_SHA'),
+    env('CF_PAGES') ??
+      env('WORKERS_CI') ??
+      gren ??
+      env('CF_PAGES_COMMIT_SHA') ??
+      env('WORKERS_CI_COMMIT_SHA'),
   );
 
   if (!paCloudflare) {
@@ -346,9 +384,14 @@ const loggaByggkontext = (kontext: Byggkontext): void => {
       ` noindex=${skaNoindexas() ? 'ja' : 'nej'}`,
   );
   console.log(
-    `[kronoclean] process.env: CF_PAGES=${visa('CF_PAGES')}` +
+    `[kronoclean] Pages:   CF_PAGES=${visa('CF_PAGES')}` +
       ` CF_PAGES_BRANCH=${visa('CF_PAGES_BRANCH')}` +
-      ` CF_PAGES_COMMIT_SHA=${env('CF_PAGES_COMMIT_SHA') ? 'satt' : '(saknas)'}` +
+      ` CF_PAGES_COMMIT_SHA=${env('CF_PAGES_COMMIT_SHA') ? 'satt' : '(saknas)'}`,
+  );
+  console.log(
+    `[kronoclean] Workers: WORKERS_CI=${visa('WORKERS_CI')}` +
+      ` WORKERS_CI_BRANCH=${visa('WORKERS_CI_BRANCH')}` +
+      ` WORKERS_CI_COMMIT_SHA=${env('WORKERS_CI_COMMIT_SHA') ? 'satt' : '(saknas)'}` +
       ` CI=${visa('CI')}`,
   );
   console.log(
@@ -387,9 +430,10 @@ export const assertRedoForProduktion = (): void => {
   if (kontext === 'cf-produktion' && env('TILLAT_PLATSHALLARE')) {
     throw new Error(
       'TILLAT_PLATSHALLARE är satt i ett produktionsbygge ' +
-        `(CF_PAGES_BRANCH=${PRODUKTIONSGREN}).\n\n` +
+        `(grenen är ${PRODUKTIONSGREN}).\n\n` +
         'Den beviljar ingenting här och hör inte hemma i production-scopet.\n' +
-        'Ta bort den: Cloudflare > Settings > Variables and Secrets > Production.\n' +
+        'Ta bort den i projektets Settings > Variables and Secrets.\n' +
+        'Gäller både Pages och Workers Builds.\n' +
         'Preview-bygget behöver den inte — undantaget härleds ur grennamnet.\n',
     );
   }
@@ -406,10 +450,13 @@ export const assertRedoForProduktion = (): void => {
   const utvag =
     kontext === 'cf-produktion'
       ? `För en delbar förhandsvisning: pusha en gren som inte heter ${PRODUKTIONSGREN}.\n` +
-        'Cloudflare bygger den som preview automatiskt — ingen variabel behövs.\n'
+        'Ingen miljövariabel behövs — undantaget härleds ur grennamnet.\n' +
+        'Pages bygger andra grenar som preview som standard; Workers Builds\n' +
+        'kräver att preview-deploys är påslagna för projektet.\n'
       : kontext === 'cf-okand-gren'
-        ? 'CF_PAGES är satt men CF_PAGES_BRANCH saknas, så bygget kan inte\n' +
-          'avgöra om detta är produktion. Spärren är fail-closed och vägrar.\n'
+        ? 'En Cloudflare-signal är satt men inget grennamn finns — varken\n' +
+          'CF_PAGES_BRANCH eller WORKERS_CI_BRANCH. Bygget kan då inte\n' +
+          'avgöra om detta är produktion. Fail-closed: vi vägrar.\n'
         : 'För ett medvetet lokalt stagingbygge: TILLAT_PLATSHALLARE=1 npm run build\n';
 
   throw new Error(
