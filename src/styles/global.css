@@ -101,11 +101,39 @@
   --palett-mist: #e1eefe;
   --palett-vit: #ffffff;
 
-  /* Avdelare, en per yta. Samma optiska tyngd på alla tre: en linje som
-     är knappt synlig på mist blir påträngande på navy och tvärtom. */
-  --palett-linje-mist: #b8d4f5;
-  --palett-linje-vit: #cbe3f7;
-  --palett-linje-navy: #263f77;
+  /**
+   * Avdelare, en per yta. Samma optiska tyngd på alla tre: en linje som
+   * är knappt synlig på mist blir påträngande på navy och tvärtom.
+   *
+   * TONRÄTTELSE 2026-09-01, och felet är värt att förstå eftersom det
+   * annars uppstår igen nästa gång någon räknar om paletten.
+   *
+   * linje-vit stod på #CBE3F7, ton 243.3°, alltså 9.4° från sky. Felet
+   * var INTE att värdet var gammalt — det räknades fram ur den nya
+   * loggan. Felet var att det förankrades mot den LJUSA FAMILJENS
+   * CENTROID (#14ADFB, ton 240.0°) i stället för mot den sky som sedan
+   * valdes till accentfärg (#0083EE, ton 252.7°).
+   *
+   * Centroiden är ett viktat medelvärde över hela den ljusa familjen,
+   * från ordmärkets mellanblå till gnistornas cyan. Den pekar därför
+   * 12.7° kallare än den enskilda pixel som blev sky. Att härleda ur
+   * mellanräkningen i stället för ur den token som faktiskt står i
+   * paletten ger en färg som är släkt med loggan men inte med sidan.
+   *
+   * REGELN: härled alltid ur den token som står i paletten, aldrig ur
+   * det mellanled den kom ur.
+   *
+   * Att 243.3° dessutom råkade sammanfalla med Nordcleans gamla ton
+   * (243.8°) gjorde felet svårare att se — det såg ut som en överlevare
+   * från förra loggan i stället för som en felförankring i den nya.
+   *
+   * Ljushet och kroma är oförändrade, så kontrasten rör sig i tredje
+   * decimalen: 1.3233 -> 1.3242 mot vitt. Rättelsen syns knappt. Den
+   * görs för att paletten ska gå att härleda vidare ur utan att driva.
+   */
+  --palett-linje-mist: #b8d4f5; /* ton 252.7°, redan rätt förankrad */
+  --palett-linje-vit: #cee2f8; /* ton 250.8° — var #CBE3F7 på 243.3° */
+  --palett-linje-navy: #263f77; /* ton 264.1°, förankrad mot navy */
 }
 
 @theme static {
@@ -136,7 +164,7 @@
   --color-pa-vitt-fokus: var(--color-pa-mist-fokus); /* 5.97 */
   /* Avdelaren är den enda som inte kan delas: --palett-linje-mist ger
      1.53 på vitt och läser då som en ram, inte som en avdelare. */
-  --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.323 */
+  --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.324 */
 
   /* ---------------------------------------------------------------- */
   /* YTA NAVY — avslutningsblocket: Kontakt + Footer.                  */
@@ -161,8 +189,14 @@
      platshållare, alltid aria-hidden, och har ingen kontrastgräns att
      klara — WCAG 1.4.11 undantar den. Den ska vara tyst, och en roll i
      ytsystemet hade tvingat upp den till 3.0 och gjort en platshållare
-     till sidans starkaste element. */
-  --color-dekor-wash: #acd8f8;
+     till sidans starkaste element.
+
+     TONRÄTTAD 2026-09-01 av exakt samma skäl som --palett-linje-vit, se
+     den kommentaren: den stod på ton 240.0°, alltså rakt på den ljusa
+     familjens centroid och 12.7° från sky. Den var den värsta av de två
+     avvikarna. Ljushet och kroma oförändrade, 1.5073 -> 1.5161 mot
+     vitt. */
+  --color-dekor-wash: #b4d5fb; /* ton 252.2° — var #ACD8F8 på 240.0° */
 
   /* Typografi — serif i rubriker, humanistisk sans i brödtext */
   --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
