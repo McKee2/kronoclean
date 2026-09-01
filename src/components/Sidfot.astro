@@ -14,17 +14,21 @@ const mejl = emailAdress();
 ---
 
 {/*
-  SIDFOTEN — andra halvan av avslutningsblocket, samma yta som Kontakt.
+  SIDFOTEN — hela avslutningsblocket, och sidans enda mörka yta.
 
-  Skild från Kontakt med LUFT, inte med en linje. Det följer regeln som
-  står i index.astro: ytbyte skiljer block, luft skiljer sektioner,
-  linje grupperar inuti en sektion. Sidfoten är en egen sektion, alltså
-  luft. Den behöver inget mer: typografin är liten och trespaltig mot
-  ett stort telefonnummer i display-snitt, så de kan inte flyta ihop.
+  Kontakt låg här tidigare. Den flyttades till mist därför att 660 px
+  sammanhängande mörkt läste som ett hopp till en annan sajt i stället
+  för som ett avslut — se kommentaren i Kontakt.astro. Kvar blir 348 px,
+  litet nog att läsa som en sidfotsribba. Färgen är oförändrad: den var
+  aldrig problemet.
+
+  Skild från Kontakt av YTBYTET, inte av luft eller linje. Det är den
+  starkaste av de tre nivåerna i regeln som står i index.astro, och den
+  är rätt här: sidfoten är inte ännu en sektion i argumentet, den är
+  slutet.
 
   <footer> ligger utanför <main>, som är rätt landmärke för
-  sidmetadata. Ytklassen sitter på elementet självt, så den mörka ytan
-  löper obruten från Kontakts överkant till sidans slut.
+  sidmetadata. Ytklassen sitter på elementet självt.
 
   ALLT innehåll är spärrat. Org.nr, orter och mejl utelämnas tyst tills
   de är bekräftade; F-skatt renderas bara om hasFTax är true. En sidfot

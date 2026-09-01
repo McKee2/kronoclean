@@ -7,26 +7,42 @@ const mejl = emailAdress();
 ---
 
 {/*
-  KONTAKT — första sektionen i avslutningsblocket, och den första
-  renderade användningen av yta-navy.
+  KONTAKT — sista sektionen i block 3, på grundytan mist.
+
+  Stod tidigare på yta-navy tillsammans med sidfoten. Den flyttades hit
+  av ett skäl som var mätt, inte tyckt: 660 px sammanhängande mörkt är
+  för mycket yta för att läsa som ett AVSLUT. Vid den storleken blir
+  blocket en egen plats, och då spelar det ingen roll att färgen är
+  släkt med loggan — den lästes som ett hopp till en annan sajt.
+
+  Färgen var alltså inte problemet. --palett-navy-deep #00156D är ett
+  bokstavligt pixelvärde ur loggan, 1.5° från navy. Storleken var
+  problemet, och den halveras genom att flytta kontakt hit: kvar blir
+  348 px sidfot, litet nog att läsa som en sidfotsribba.
+
+  Ett mellansteg övervägdes och förkastades med mätning: mist ligger
+  92 % av vägen mot vitt (vit -> mist är ΔE 0.0615, mist -> navy är
+  0.6888), så att lägga mist emellan delar inte fallet — det flyttar
+  samma stup en sektion ned. Poängen med flytten är ytans STORLEK, inte
+  att steget skulle bli mjukare.
+
+  Sektionen hamnar dessutom rätt i blockplanen på köpet: block 3 är
+  mist och rymmer Områden och Vanliga frågor. Kontakt hör hemma där.
 
   Telefonen är PRIMÄR, inte en av flera vägar. Det syns i tre val:
   numret står i display-snittet i samma storlek som heron, mejlen står
   i brödtextstorlek under en avdelare, och det finns inget formulär.
   Ett formulär hade konkurrerat om samma klick och gjort ett val av
   något kunden redan bestämt.
-
-  Alla färger kommer ur pa-navy-*. Inget här kunde lånas från de ljusa
-  ytorna: pa-mist-brod ger 1.9 mot navy och pa-mist-accent-liten 1.4.
 */}
 <section
-  class="yta-navy pt-20 pb-20 lg:pt-28 lg:pb-28"
+  class="yta-mist pt-20 pb-20 lg:pt-28 lg:pb-28"
   aria-labelledby="kontakt-rubrik"
 >
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
     <h2
       id="kontakt-rubrik"
-      class="font-display text-3xl text-pa-navy-rubrik sm:text-4xl"
+      class="font-display text-3xl text-pa-mist-rubrik sm:text-4xl"
     >
       Hör av dig
     </h2>
@@ -40,7 +56,7 @@ const mejl = emailAdress();
     */}
     {
       svarstid && (
-        <p class="mt-3 max-w-xl font-sans text-base text-pa-navy-brod">
+        <p class="mt-3 max-w-xl font-sans text-base text-pa-mist-brod">
           {svarstid}
         </p>
       )
@@ -49,7 +65,7 @@ const mejl = emailAdress();
     {
       telefon.lage !== 'dolt' && (
         <div class="mt-10">
-          <p class="mb-2 font-sans text-sm text-pa-navy-brod">
+          <p class="mb-2 font-sans text-sm text-pa-mist-brod">
             {telefon.lage === 'bekraftat'
               ? 'Ring så bokar vi en tid'
               : 'Numret läggs in innan sidan går live'}
@@ -66,12 +82,12 @@ const mejl = emailAdress();
               aria-label={`Ring ${telefon.text}`}
               class="telefon-lank inline-block py-1"
             >
-              <span class="font-display text-4xl text-pa-navy-rubrik sm:text-5xl">
+              <span class="font-display text-4xl text-pa-mist-rubrik sm:text-5xl">
                 {telefon.text}
               </span>
             </a>
           ) : (
-            <p class="py-1 font-display text-4xl text-pa-navy-rubrik sm:text-5xl">
+            <p class="py-1 font-display text-4xl text-pa-mist-rubrik sm:text-5xl">
               {telefon.text}
             </p>
           )}
@@ -81,13 +97,13 @@ const mejl = emailAdress();
 
     {
       mejl && (
-        <div class="mt-10 border-t border-pa-navy-linje pt-6">
-          <p class="font-sans text-sm text-pa-navy-brod">
+        <div class="mt-10 border-t border-pa-mist-linje pt-6">
+          <p class="font-sans text-sm text-pa-mist-brod">
             Ringer du ogärna går det lika bra att mejla.
           </p>
           <a
             href={`mailto:${mejl}`}
-            class="mejl-lank mt-1 inline-block font-sans text-base text-pa-navy-accent-liten"
+            class="mejl-lank mt-1 inline-block font-sans text-base text-pa-mist-accent-liten"
           >
             {mejl}
           </a>
@@ -99,9 +115,9 @@ const mejl = emailAdress();
 
 <style>
   /*
-    Understrykningen ritas ut vid hover, som i heron — men i vitt, för
-    att pa-navy-accent på ett vitt telefonnummer hade varit en färg som
-    inte syns mot texten den ligger under.
+    Understrykningen ritas ut vid hover, som i heron. Nu på mist, så den
+    använder samma accent som heron gör — sektionerna står på samma yta
+    och ska bete sig likadant.
   */
   .telefon-lank {
     position: relative;
@@ -114,7 +130,7 @@ const mejl = emailAdress();
     bottom: -2px;
     height: 2px;
     width: 100%;
-    background: var(--color-pa-navy-rubrik);
+    background: var(--color-pa-mist-accent);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -126,11 +142,10 @@ const mejl = emailAdress();
   }
 
   /*
-    Mejllänken är understruken från början. Den ligger i brödtextstorlek
-    på mörk botten, och där räcker inte färg ensamt för att markera en
-    länk — WCAG 1.4.1 kräver att information inte bärs av färg allena.
-    Telefonnumret ovan är undantaget: det är 36–48 px i ett annat snitt
-    och kan inte förväxlas med brödtext.
+    Mejllänken är understruken från början. Den ligger i brödtextstorlek,
+    och färg ensamt får inte bära informationen att något är en länk —
+    WCAG 1.4.1. Telefonnumret ovan är undantaget: det är 36–48 px i ett
+    annat snitt och kan inte förväxlas med brödtext.
   */
   .mejl-lank {
     text-decoration: underline;
@@ -139,7 +154,7 @@ const mejl = emailAdress();
   }
 
   .mejl-lank:hover {
-    color: var(--color-pa-navy-rubrik);
+    color: var(--color-pa-mist-rubrik);
   }
 
   @media (prefers-reduced-motion: reduce) {
