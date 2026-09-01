@@ -49,6 +49,11 @@
   // bygge vi inte gjort om.
   "compatibility_date": "2026-09-01",
 
+  // Preview-URL:er per version. Utan denna får ett
+  // `wrangler versions upload` ingen adress att öppna — versionen
+  // laddas upp men går inte att nå.
+  "preview_urls": true,
+
   "assets": {
     // Astros default-utdata. Ingen outDir är satt i astro.config.mjs,
     // så den här strängen och Astro får inte glida isär.
