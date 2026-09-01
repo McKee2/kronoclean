@@ -2,8 +2,7 @@
 import {
   COMPANY,
   trustMarkers,
-  phoneDisplay,
-  phoneHref,
+  telefonVy,
   ownerFirstName,
   responsePromise,
 } from '../../data/company';
@@ -22,8 +21,7 @@ const markers = trustMarkers('privat');
  * ens kommer hit (assertRedoForProduktion i index.astro) — degraderingen
  * nedan finns för att layouten ska gå att arbeta med i dev.
  */
-const telefon = phoneDisplay();
-const telefonHref = phoneHref();
+const telefon = telefonVy();
 const namn = ownerFirstName();
 const svarstid = responsePromise();
 ---
@@ -112,24 +110,42 @@ const svarstid = responsePromise();
 
         {/*
           Signaturelementet: numret som skylt, inte som knapp.
-          Hela blocket utelämnas om numret är obekräftat — en tel:-länk
-          till ett påhittat nummer är värre än ingen länk alls.
+
+          Tre lägen, och skillnaden mellan de två första sitter i om det
+          finns en <a> över huvud taget. Faran var aldrig att en siffra
+          syns — den var en fungerande tel:-länk till fel person. I
+          platshållarläget finns därför ingen länk, ingen aria-label som
+          påstår att man kan ringa, och inget hovertillstånd.
+
+          telefon.href finns bara på 'bekraftat'-varianten, så den här
+          markupen kan inte skrivas fel: en <a href={telefon.href}> i fel
+          gren kompilerar inte.
         */}
         {
-          telefon && telefonHref && (
+          telefon.lage !== 'dolt' && (
             <div class="reveal [--delay:0.28s] mt-10">
               <p class="mb-2 font-sans text-sm text-pa-mist-brod">
-                Ring så bokar vi en tid
+                {telefon.lage === 'bekraftat'
+                  ? 'Ring så bokar vi en tid'
+                  : 'Numret läggs in innan sidan går live'}
               </p>
-              <a
-                href={telefonHref}
-                aria-label={`Ring ${telefon}`}
-                class="phone-link group inline-block py-1"
-              >
-                <span class="font-display text-4xl text-pa-mist-rubrik transition-colors group-hover:text-pa-mist-accent group-focus-visible:text-pa-mist-accent sm:text-5xl">
-                  {telefon}
-                </span>
-              </a>
+
+              {telefon.lage === 'bekraftat' ? (
+                <a
+                  href={telefon.href}
+                  aria-label={`Ring ${telefon.text}`}
+                  class="phone-link group inline-block py-1"
+                >
+                  <span class="font-display text-4xl text-pa-mist-rubrik transition-colors group-hover:text-pa-mist-accent group-focus-visible:text-pa-mist-accent sm:text-5xl">
+                    {telefon.text}
+                  </span>
+                </a>
+              ) : (
+                <p class="py-1 font-display text-4xl text-pa-mist-rubrik sm:text-5xl">
+                  {telefon.text}
+                </p>
+              )}
+
               {svarstid && (
                 <p class="mt-3 font-sans text-sm text-pa-mist-brod">{svarstid}</p>
               )}

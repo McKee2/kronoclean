@@ -22,6 +22,11 @@
  *      TypeScript ser vilken gren som är levande.
  */
 
+/**
+ * Telefonens tre lägen. Se phoneStatus i COMPANY.
+ */
+export type TelefonLage = 'bekraftat' | 'platshallare' | 'dolt';
+
 export const COMPANY = {
   name: 'Kronoclean',
   tagline: 'Rent · Fräscht · Pålitligt',
@@ -31,6 +36,18 @@ export const COMPANY = {
   phoneHref: 'tel:+46700000000',
 
   /**
+   * Vad som visas i läget 'platshallare'. Måste vara OMÖJLIG att slå.
+   *
+   * X:en är hela poängen. 070-000 00 00 ser ut som ett nummer och kan
+   * ringas — det var faran, inte att en siffra syns. 07X-XXX XX XX kan
+   * ingen ringa och ingen missta för äkta, så den kan visas utan att
+   * någon riskerar att nå fel person.
+   *
+   * Skriv aldrig om den till något slåbart "så länge".
+   */
+  phonePlatshallare: '07X-XXX XX XX',
+
+  /**
    * TODO: förnamnet på den i familjen som står som ägare och är den
    * kunden pratar med. Renderas i hero, i meningen "Jag heter NN och
    * driver Kronoclean tillsammans med min familj" — alltså som
@@ -38,6 +55,12 @@ export const COMPANY = {
    * här som en formulering längre ned gör till ensam utförare igen.
    */
   ownerFirstName: 'NN',
+
+  /**
+   * TODO: mejladressen. Sekundär kontaktväg i kontaktsektionen och
+   * sidfoten — för den som ogärna ringer. Telefonen är primär.
+   */
+  email: 'kontakt@kronoclean.se',
 
   /** TODO: org.nr till sidfot och juridiska sidor */
   orgNr: '000000-0000',
@@ -67,9 +90,54 @@ export const COMPANY = {
    * Så länge en flagga är false utelämnas fältet ur strukturerad data,
    * meta och sidan — det fylls aldrig med platshållaren.
    */
-  phoneConfirmed: false,
+  /**
+   * Telefonens tillstånd. ETT fält, tre ömsesidigt uteslutande lägen —
+   * inte två booleans som kan hamna i konflikt.
+   *
+   *   'bekraftat'    numret är verifierat med kunden. Renderas som
+   *                  klickbar tel:-länk.
+   *   'platshallare' 07X-XXX XX XX som ren text. Ingen tel:-länk, ingen
+   *                  aria-label som påstår att man kan ringa.
+   *   'dolt'         blocket utelämnas helt.
+   *
+   * Varför en union och inte en andra boolean: med phoneConfirmed +
+   * phoneShowPlaceholder finns fyra kombinationer men bara tre giltiga
+   * tillstånd. Den fjärde — bekräftat OCH platshållare — har ingen
+   * mening, och det är precis den sortens tillstånd som blir kvar efter
+   * en halvfärdig ändring. Ett fält kan inte motsäga sig självt.
+   *
+   * Detta bryter INTE mot SANNINGSPRINCIPEN överst. Den förbjuder att
+   * spärren härleds ur DATAVÄRDET genom strängsniffning. Det här är ett
+   * eget tillståndsfält som en människa sätter, det syns i en diff, och
+   * inuti `as const` smalnar det till en literal så TypeScript ser vilken
+   * gren som är levande. Alla fem skälen håller.
+   *
+   * Produktionsspärren gäller oförändrat: bara 'bekraftat' släpper
+   * igenom bygget. Det här ändrar hur ett VÄGRAT bygge ser ut, inte om
+   * det godkänns.
+   */
+  phoneStatus: 'platshallare',
   ownerNameConfirmed: false,
   orgNrConfirmed: false,
+
+  /**
+   * Mejladressen. Utelämnas tyst tills den är bekräftad — telefonen är
+   * primär kontaktväg, så sidan har en fungerande väg även utan den.
+   */
+  emailConfirmed: false,
+
+  /**
+   * true först när /integritetspolicy faktiskt finns och svarar 200.
+   * Samma princip som apple-touch-icon i index.astro: en länk till en
+   * sida som ger 404 är samma sorts osanning som en platshållartelefon,
+   * och i sidfoten är den värre — där läser besökaren den som ett bevis
+   * på att policyn finns.
+   *
+   * Sidan samlar i dag ingenting: inget formulär, inga kakor, ingen
+   * analys. Det finns alltså ännu inget att beskriva. Flaggan vänds den
+   * dag något av det tillkommer, och då är policyn inte valfri.
+   */
+  privacyPolicyConfirmed: false,
   areasConfirmed: false,
   responsePromiseConfirmed: false,
 
@@ -101,9 +169,33 @@ export const COMPANY = {
  *   ogImageConfirmed  Har en sann fallback (loggan). Inget osant renderas.
  *   orgNrConfirmed    Renderas ingenstans än, och ska aldrig in i JSON-LD.
  *   areasConfirmed    Utelämnas tyst ur grafen. Ingen besökare ser skillnad.
+ *   emailConfirmed    Utelämnas tyst. Telefonen är primär kontaktväg, så
+ *                     sidan har en fungerande väg utan den.
+ *   privacyPolicyConfirmed
+ *                     Länken utelämnas. Sidan samlar i dag ingen
+ *                     persondata, så det finns inget att beskriva ännu.
  */
+/**
+ * Breddande läsare för telefonläget. Exakt samma mekanik och exakt samma
+ * skäl som phoneDisplay(): string | null längre ned.
+ *
+ * Inuti `as const` smalnar phoneStatus till literalen 'platshallare', och
+ * TypeScript vet därför att `=== 'bekraftat'` alltid är falskt. För en
+ * boolean är den smalningen en fördel — den visar vilken gren som lever.
+ * För en tre-lägesunion blir varje jämförelse ett TYPFEL i stället:
+ * ts(2367) på spärren och på JSON-LD-grenen, ts(2678) på switchen i
+ * telefonVy. Mätt, 3 fel i astro check.
+ *
+ * Returtypsannoteringen breddar tillbaka till unionen, så alla tre
+ * grenarna står kvar som möjliga. Det är korrekt: värdet sätts av en
+ * människa och koden måste hantera alla tre.
+ *
+ * Jämför ALDRIG COMPANY.phoneStatus direkt — gå via den här.
+ */
+export const telefonLage = (): TelefonLage => COMPANY.phoneStatus;
+
 const LANSERINGSSPARRAR: ReadonlyArray<readonly [string, boolean, string]> = [
-  ['phoneConfirmed', COMPANY.phoneConfirmed, 'telefonnumret — sidans enda konvertering'],
+  ['phoneStatus', telefonLage() === 'bekraftat', 'telefonnumret — sidans enda konvertering'],
   ['ownerNameConfirmed', COMPANY.ownerNameConfirmed, 'kontaktpersonens förnamn — renderas i hero'],
   ['responsePromiseConfirmed', COMPANY.responsePromiseConfirmed, 'svarstidslöftet — ett löfte de måste kunna hålla'],
   ['domainConfirmed', COMPANY.domainConfirmed, 'domänen — canonical, og:url, sitemap och JSON-LD pekar dit'],
@@ -401,11 +493,58 @@ export const fakturaSteg = (
  * skulle TypeScript smalna till `null` (flaggan är literalen false inuti
  * `as const`) och konsumenten skulle tappa string-grenen.
  */
-export const phoneDisplay = (): string | null =>
-  COMPANY.phoneConfirmed ? COMPANY.phone : null;
+/**
+ * Telefonvyn som DISKRIMINERAD UNION, inte som två oberoende läsare.
+ *
+ * Poängen ligger i typerna: `href` finns bara på 'bekraftat'-varianten.
+ * En komponent som försöker rendera en tel:-länk i platshållarläget
+ * kompilerar därför inte — misstaget är inte otillåtet, det är
+ * orepresenterbart. Med två nullable-läsare hade
+ * `telefon && <a href={telefonHref}>` sett rimligt ut och tyst gett en
+ * länk till `null` när platshållaren visades.
+ *
+ * `aldrigKlickbar` finns för att göra avsikten läsbar på anropssidan.
+ * Den bär ingen logik — den finns för att den som läser markup ska se
+ * varför det inte står någon <a> där.
+ */
+export type TelefonVy =
+  | { lage: 'bekraftat'; text: string; href: string }
+  | { lage: 'platshallare'; text: string; aldrigKlickbar: true }
+  | { lage: 'dolt' };
 
-export const phoneHref = (): string | null =>
-  COMPANY.phoneConfirmed ? COMPANY.phoneHref : null;
+export const telefonVy = (): TelefonVy => {
+  switch (telefonLage()) {
+    case 'bekraftat':
+      return { lage: 'bekraftat', text: COMPANY.phone, href: COMPANY.phoneHref };
+    case 'platshallare':
+      return {
+        lage: 'platshallare',
+        text: COMPANY.phonePlatshallare,
+        aldrigKlickbar: true,
+      };
+    default:
+      return { lage: 'dolt' };
+  }
+};
+
+/**
+ * Företagsuppgifter till sidfoten. Egen lista, inte trustMarkers:
+ * markörerna säljer ("50 % RUT-avdrag"), sidfoten redovisar. Samma
+ * flaggor styr båda, så inget kan bli sant på ett ställe och falskt på
+ * det andra.
+ */
+export const foretagsuppgifter = (): string[] => {
+  const rader: string[] = [];
+  const nr = orgNr();
+  if (nr) rader.push(`Org.nr ${nr}`);
+  if (COMPANY.hasFTax) rader.push('Godkänd för F-skatt');
+  if (COMPANY.hasInsurance) rader.push('Ansvarsförsäkrad');
+  return rader;
+};
+
+/** Mejladressen, eller null tills den är bekräftad. */
+export const emailAdress = (): string | null =>
+  COMPANY.emailConfirmed ? COMPANY.email : null;
 
 export const ownerFirstName = (): string | null =>
   COMPANY.ownerNameConfirmed ? COMPANY.ownerFirstName : null;
@@ -617,7 +756,7 @@ export const buildStructuredData = (site: URL | undefined): JsonLdNode => {
     logo: absoluteUrl(site, SEO.logoPath),
     description: SEO.description,
 
-    ...(COMPANY.phoneConfirmed
+    ...(telefonLage() === 'bekraftat'
       ? { telephone: COMPANY.phoneHref.replace(/^tel:/, '') }
       : {}),
 
