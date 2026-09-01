@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Hero from '../components/sections/Hero.astro';
 import Tjanster from '../components/sections/Tjanster.astro';
+import SaGarDetTill from '../components/sections/SaGarDetTill.astro';
 import {
   COMPANY,
   SEO,
@@ -80,9 +81,29 @@ const structuredData = buildStructuredData(Astro.site);
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
   <body>
+    {/*
+      SEKTIONSRYTMEN. Fyra block, tre ytbyten, åtta sektioner när sidan
+      är färdig. Ytan byts när LÄSARENS UPPGIFT byts, inte varannan
+      sektion — ren växling ljus/mörk läser som ränder och betyder
+      ingenting.
+
+        yta-mist   Hero · Tjänster              orienterar sig
+        yta-vit    Så går det till · Priser     kontrollerar affären
+        yta-mist   Områden · Vanliga frågor     slår upp
+        yta-navy   Kontakt · Footer             avslutar
+
+      Två sektioner i samma yta skiljs av LUFT, inte av en linje: varje
+      sektion har py-20/lg:py-28, alltså 160 px på mobil och 224 px på
+      desktop mellan innehållen, och var och en inleds med sin egen h2.
+      Linjen är reserverad för gruppering INUTI en sektion — så som
+      Tjänster skiljer privat från företag. Tre nivåer, tre medel, ingen
+      överlappning: ytbyte skiljer block, luft skiljer sektioner, linje
+      grupperar inuti en sektion.
+    */}
     <main>
       <Hero />
       <Tjanster />
+      <SaGarDetTill segment="privat" />
     </main>
   </body>
 </html>

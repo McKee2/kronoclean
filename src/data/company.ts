@@ -360,6 +360,43 @@ export const segmentVillkor = (segment: SegmentId): string =>
     : 'Faktureras företag. RUT gäller bara privatpersoner.';
 
 /**
+ * Sista steget i "Så går det till". Segmentberoende av samma skäl som
+ * trustMarkers, men konsekvensen är hårdare här: steg 4 är hela
+ * anledningen till att sektionen finns. RUT-mekaniken är det enda i
+ * affären som folk faktiskt inte förstår, och en företagskund som läser
+ * "RUT-avdraget är redan avdraget" får veta något som är falskt om just
+ * hennes faktura.
+ *
+ * Alternativet — en formulering som rymmer båda — provades och
+ * förkastades. Den blir ofrånkomligen villkorad ("om du är privatperson
+ * dras RUT direkt"), och en brasklapp mitt i det steg som ska ta bort
+ * osäkerhet lägger tillbaka precis den osäkerhet sektionen finns för att
+ * ta bort. Två korta sanna versioner slår en lång hedgad.
+ *
+ * Procentsatsen läses ur COMPANY.rutPercent så texten inte kan glida
+ * ifrån regeln den beskriver.
+ */
+export const fakturaSteg = (
+  segment: SegmentId,
+): { rubrik: string; text: string } =>
+  SEGMENT[segment].rut
+    ? {
+        rubrik: 'Faktura med RUT redan avdraget',
+        text:
+          `Du får fakturan efteråt, och ${COMPANY.rutPercent} % av ` +
+          'arbetskostnaden är redan avdragen. Du betalar bara det som ' +
+          'återstår — det finns inget att ansöka om, och du lägger aldrig ' +
+          'ut för avdraget själv. Vi begär resten från Skatteverket.',
+      }
+    : {
+        rubrik: 'Faktura',
+        text:
+          'Du får fakturan efter utfört arbete, med sedvanliga ' +
+          'betalningsvillkor. RUT är ett avdrag för privatpersoner och ' +
+          'gäller inte företag.',
+      };
+
+/**
  * Spärrade läsare. Returtypen är explicit `string | null` — utan den
  * skulle TypeScript smalna till `null` (flaggan är literalen false inuti
  * `as const`) och konsumenten skulle tappa string-grenen.

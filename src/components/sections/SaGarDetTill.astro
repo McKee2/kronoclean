@@ -1,0 +1,125 @@
+---
+import { fakturaSteg, type SegmentId } from '../../data/company';
+
+/**
+ * Segmentet är obligatoriskt, precis som i trustMarkers. Det sista
+ * steget skiljer sig helt mellan privat och företag, och ett
+ * standardvärde hade gjort skillnaden tyst.
+ */
+interface Props {
+  segment: SegmentId;
+}
+
+const { segment } = Astro.props;
+
+const faktura = fakturaSteg(segment);
+
+/**
+ * Stegen är prosa och bor därför här, inte i datafilen. Undantaget är
+ * det sista: dess sanning hänger på SEGMENT.rut och räknas fram av
+ * fakturaSteg() tillsammans med resten av RUT-logiken.
+ *
+ * Texterna är avsiktligt korta och avsiktligt osäljande. Läsaren som
+ * behöver den här sektionen har aldrig anlitat städhjälp och undrar vad
+ * som faktiskt händer — inte varför hon borde. Varje mening beskriver en
+ * handling, ingen mening berömmer något.
+ *
+ * Steg 1 säger INTE hur snabbt vi svarar. Svarstidslöftet är spärrat
+ * bakom responsePromiseConfirmed, och det vore märkligt att smyga in det
+ * här när det inte får renderas tio centimeter längre upp på sidan.
+ */
+const STEG = [
+  {
+    rubrik: 'Du ringer',
+    text: 'Du berättar vad du behöver hjälp med och var du bor. Vi hittar en tid som passar dig.',
+  },
+  {
+    rubrik: 'Vi kommer överens',
+    text: 'Vi går igenom vad som ska ingå och vad det kostar. Priset får du innan vi börjar, inte efteråt.',
+  },
+  {
+    rubrik: 'Vi städar',
+    text: 'Vi kommer på den tid vi bestämt och gör det vi kommit överens om.',
+  },
+  faktura,
+];
+---
+
+<section
+  class="yta-vit pt-20 pb-20 lg:pt-28 lg:pb-28"
+  aria-labelledby="sa-gar-det-till"
+>
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <h2
+      id="sa-gar-det-till"
+      class="font-display text-3xl text-pa-vitt-rubrik sm:text-4xl"
+    >
+      Så går det till
+    </h2>
+    <p class="mt-2 max-w-xl font-sans text-sm text-pa-vitt-brod">
+      Har du aldrig anlitat städhjälp förut är det här allt som händer.
+    </p>
+
+    {/*
+      NUMRERING I STÄLLET FÖR IKONER — ett medvetet val, inte lättja.
+
+      Tre skäl, i fallande tyngd:
+
+      1. Sekvensen ÄR informationen. Det enda läsaren behöver veta utöver
+         orden är i vilken ordning det sker, och en siffra säger det
+         direkt. En ikon säger det inte — man får läsa vänster till höger
+         och dra slutsatsen själv.
+      2. Ikonerna skulle bli tautologier. En telefonlur bredvid ordet
+         "Du ringer" och en kvast bredvid "Vi städar" upprepar rubriken i
+         bild utan att lägga till något. Ikonerna i tjänstekorten gör
+         motsatsen: de skiljer fem likartade rubriker åt.
+      3. Sidan har redan ett ikonspråk med en uppgift — identitet.
+         Återanvänds det för sekvens blir båda betydelserna otydligare.
+
+      <ol> bär ordningen semantiskt. Siffran är därför ren dekor och
+      aria-hidden — annars läser skärmläsaren "ett ett Du ringer".
+    */}
+    <ol class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4 lg:gap-6">
+      {
+        STEG.map((steg, i) => (
+          <li class="flex flex-col">
+            <span class="steg-nummer" aria-hidden="true">{i + 1}</span>
+            <h3 class="mt-4 font-display text-xl text-pa-vitt-rubrik">
+              {steg.rubrik}
+            </h3>
+            <p class="mt-2 font-sans text-sm leading-relaxed text-pa-vitt-brod">
+              {steg.text}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  /**
+   * Siffran ritas med samma regler som ikonerna: tunn linje, ingen
+   * fyllning, accentfärgen. En fylld cirkel hade blivit en fjärde yta
+   * med egna kontrastkrav för ingenting.
+   *
+   * Måtten är låsta i rem och inte i procent så cirkeln förblir en
+   * cirkel oavsett vad siffran innehåller. Tvåsiffriga steg ryms.
+   */
+  .steg-nummer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    border-radius: 9999px;
+    border: 1.5px solid var(--color-pa-vitt-accent);
+    color: var(--color-pa-vitt-accent-liten);
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+</style>
