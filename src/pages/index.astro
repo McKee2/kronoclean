@@ -3,6 +3,8 @@ import '../styles/global.css';
 import Hero from '../components/sections/Hero.astro';
 import Tjanster from '../components/sections/Tjanster.astro';
 import SaGarDetTill from '../components/sections/SaGarDetTill.astro';
+import Kontakt from '../components/sections/Kontakt.astro';
+import Sidfot from '../components/Sidfot.astro';
 import {
   COMPANY,
   SEO,
@@ -104,6 +106,12 @@ const structuredData = buildStructuredData(Astro.site);
       <Hero />
       <Tjanster />
       <SaGarDetTill segment="privat" />
+      <Kontakt />
     </main>
+    {/* <footer> hör inte hemma i <main> — den är sidmetadata, inte
+        sidans innehåll. Ytan är densamma som Kontakts, så det mörka
+        blocket löper obrutet till sidans slut trots att gränsen för
+        <main> går emellan. */}
+    <Sidfot />
   </body>
 </html>

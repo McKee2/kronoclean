@@ -1,0 +1,144 @@
+---
+import {
+  COMPANY,
+  foretagsuppgifter,
+  serviceAreas,
+  telefonVy,
+  emailAdress,
+} from '../data/company';
+
+const uppgifter = foretagsuppgifter();
+const orter = serviceAreas();
+const telefon = telefonVy();
+const mejl = emailAdress();
+---
+
+{/*
+  SIDFOTEN — andra halvan av avslutningsblocket, samma yta som Kontakt.
+
+  Skild från Kontakt med LUFT, inte med en linje. Det följer regeln som
+  står i index.astro: ytbyte skiljer block, luft skiljer sektioner,
+  linje grupperar inuti en sektion. Sidfoten är en egen sektion, alltså
+  luft. Den behöver inget mer: typografin är liten och trespaltig mot
+  ett stort telefonnummer i display-snitt, så de kan inte flyta ihop.
+
+  <footer> ligger utanför <main>, som är rätt landmärke för
+  sidmetadata. Ytklassen sitter på elementet självt, så den mörka ytan
+  löper obruten från Kontakts överkant till sidans slut.
+
+  ALLT innehåll är spärrat. Org.nr, orter och mejl utelämnas tyst tills
+  de är bekräftade; F-skatt renderas bara om hasFTax är true. En sidfot
+  är det sista stället där en platshållare får stå, eftersom det är där
+  besökaren letar efter beviset att företaget finns på riktigt.
+*/}
+<footer class="yta-navy pt-20 pb-20 lg:pt-28 lg:pb-28">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <p class="font-display text-2xl text-pa-navy-rubrik">{COMPANY.name}</p>
+        <p class="mt-2 font-sans text-sm text-pa-navy-brod">
+          {COMPANY.tagline}
+        </p>
+
+        {
+          uppgifter.length > 0 && (
+            <ul class="mt-4 space-y-1">
+              {uppgifter.map((rad) => (
+                <li class="font-sans text-sm text-pa-navy-brod">{rad}</li>
+              ))}
+            </ul>
+          )
+        }
+      </div>
+
+      <div>
+        <h2 class="font-sans text-sm font-semibold text-pa-navy-rubrik">
+          Kontakt
+        </h2>
+        <ul class="mt-3 space-y-2">
+          {
+            telefon.lage !== 'dolt' && (
+              <li class="font-sans text-sm text-pa-navy-brod">
+                {telefon.lage === 'bekraftat' ? (
+                  <a
+                    href={telefon.href}
+                    aria-label={`Ring ${telefon.text}`}
+                    class="sidfot-lank text-pa-navy-accent-liten"
+                  >
+                    {telefon.text}
+                  </a>
+                ) : (
+                  telefon.text
+                )}
+              </li>
+            )
+          }
+          {
+            mejl && (
+              <li class="font-sans text-sm">
+                <a
+                  href={`mailto:${mejl}`}
+                  class="sidfot-lank text-pa-navy-accent-liten"
+                >
+                  {mejl}
+                </a>
+              </li>
+            )
+          }
+        </ul>
+
+        {/*
+          Integritetspolicyn länkas FÖRST när sidan finns. En länk som
+          ger 404 är samma sorts osanning som en platshållartelefon, och
+          i sidfoten är den värre: där läser besökaren den som ett bevis
+          på att policyn existerar.
+
+          Ingen grå oklickbar text står här under tiden heller. "Vi har
+          en integritetspolicy, den går bara inte att läsa" är ett sämre
+          påstående än tystnad.
+        */}
+        {
+          COMPANY.privacyPolicyConfirmed && (
+            <p class="mt-4 font-sans text-sm">
+              <a href="/integritetspolicy" class="sidfot-lank text-pa-navy-accent-liten">
+                Integritetspolicy
+              </a>
+            </p>
+          )
+        }
+      </div>
+
+      {
+        orter.length > 0 && (
+          <div>
+            <h2 class="font-sans text-sm font-semibold text-pa-navy-rubrik">
+              Vi kör till
+            </h2>
+            <ul class="mt-3 space-y-1">
+              {orter.map((ort) => (
+                <li class="font-sans text-sm text-pa-navy-brod">{ort}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</footer>
+
+<style>
+  /*
+    Understruken från början, av samma skäl som mejllänken i Kontakt:
+    liten text på mörk botten där färg ensamt inte får bära informationen
+    att något är en länk (WCAG 1.4.1).
+  */
+  .sidfot-lank {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  .sidfot-lank:hover {
+    color: var(--color-pa-navy-rubrik);
+  }
+</style>
