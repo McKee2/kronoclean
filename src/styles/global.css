@@ -1,42 +1,63 @@
 @import "tailwindcss";
 
 /**
- * Nordclean designtokens.
+ * Kronoclean designtokens.
  * Marinblå och ljusblå är avlästa ur loggan. Resten är byggt runt dem.
+ *
+ * Omräknade 2026-09-01 mot den nya loggan. Avläsningen är inte en
+ * pipettklick på en pixel utan en viktad centroid i LINJÄRT ljus över
+ * filens 372 952 opaka pixlar, delade på OKLab-ljushet i en mörk och en
+ * ljus familj (44.8 % respektive 33.1 % av bläcket). Att vikta i sRGB
+ * hade dragit centroiden för mörkt — sRGB är gammakodat, och medelvärdet
+ * av två sRGB-tal är inte färgen mitt emellan dem.
+ *
+ * navy och sky är efter det RIKTIGA pixelvärden ur filen, inte
+ * approximationer: närmaste faktiska pixel ligger på ΔRGB 0.0 från båda.
+ *
+ * Skillnaden mot förra loggan är kroma, inte ljushet. navy står kvar på
+ * samma OKL (0.335 -> 0.324) men har dubbla kromat (0.075 -> 0.155).
+ * Sky-familjen är både ljusare och mättare.
  *
  * Kontrastvärdena i kommentarerna är uträknade, inte uppskattade: sRGB
  * relativ luminans enligt WCAG 2.x, verifierade två oberoende vägar
- * (hex-komposit och oklab->sRGB med rundtrippskontroll).
+ * (hex-komposit och oklab->sRGB med rundtrippskontroll). De mäts mot
+ * mist, inte mot vitt: mist är sidbakgrunden och ger ALLTID det lägre
+ * talet, så klarar en token mist klarar den korten också.
  *
  * REGEL: en färgtoken vars namn inte säger "text" är inte godkänd för
  * liten text. Liten text = under 24px normal eller under 18.66px fet.
  */
 @theme {
-  /* Från loggan. Oförändrade — de är varumärket. */
-  --color-navy: #16385c; /* mist 10.80 · vitt 11.97 */
-  --color-sky: #4a90ce; /* mist 3.07 · vitt 3.40 — ikoner, ramar, hover, STOR text */
+  /* Ur loggan, bokstavligt. Ändra bara om loggan ändras. */
+  --color-navy: #002881; /* mist 11.69 · vitt 12.96 — OKLCh 0.324/0.155/262 */
+  --color-sky: #0083ee; /* mist 3.46 · vitt 3.83 — ikoner, ramar, hover, STOR text */
 
   /* Härledda */
-  --color-navy-deep: #0f2740;
-  --color-sky-soft: #e8f1f9;
+  --color-navy-deep: #00156d; /* mist 14.26 — även denna en faktisk pixel */
+  --color-sky-soft: #dcf2ff;
   --color-mist: #EEF4F9;
-  --color-ink: #1a2733; /* mist 13.71 · vitt 15.20 */
-  --color-line: #d5e3ef; /* mist 1.18 · vitt 1.31 — dekorativ avdelare, ej UI-gräns */
+  --color-ink: #18243b; /* mist 13.99 · vitt 15.51 */
+  --color-line: #cbe3f7; /* mist 1.19 · vitt 1.32 — dekorativ avdelare, ej UI-gräns */
 
   /**
    * Textsäkra tokens. Båda klarar 4.5:1 mot BÅDE mist och vitt, så de
    * kan inte bli ogiltiga beroende på vilket underlag de hamnar på.
    * Framräknade i OKLCh med bevarad ton — samma kulör, lägre ljushet.
+   *
+   * Marginalen är avsiktlig och ska inte ätas upp: kravet är 4.5, golvet
+   * här är 4.8. En token som landar på 4.51 är formellt godkänd och i
+   * praktiken en avrundning från underkänd.
    */
-  --color-sky-text: #276faa; /* mist 4.81 · vitt 5.33 — sky mörkad för liten text */
-  --color-slate: #556b7d; /* mist 5.00 · vitt 5.55 — brödtext och sekundärtext */
+  --color-sky-text: #006bb5; /* mist 5.02 · vitt 5.57 — sky mörkad för liten text */
+  --color-slate: #5d677b; /* mist 5.13 · vitt 5.69 — brödtext och sekundärtext */
 
   /**
-   * Ren dekoration. Platt värde i stället för opacitetsmodifierare:
-   * exakt samma pixel som sky vid 35 % på vitt gav, rgb(192,216,238).
+   * Ren dekoration. Platt värde i stället för opacitetsmodifierare, av
+   * samma skäl som förut: en opacitetsmodifierare gör den faktiska
+   * färgen beroende av vad som råkar ligga bakom.
    * aria-hidden-grafik undantas av WCAG 1.4.11. Använd aldrig till text.
    */
-  --color-sky-wash: #c0d8ee; /* vitt 1.47 */
+  --color-sky-wash: #acd8f8; /* mist 1.36 · vitt 1.51 */
 
   /* Typografi — serif i rubriker, humanistisk sans i brödtext */
   --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;

@@ -24,16 +24,28 @@ const svarstid = responsePromise();
 
 <section class="pt-10 pb-20 lg:pt-14 lg:pb-28" aria-labelledby="hero-rubrik">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
-    {/* Logotyp. Byt till .png om SVG saknas. */}
+    {/*
+      Logotyp. width/height är filens FAKTISKA pixelmått, 1672x941 — inte
+      avrundade och inte gissade. Attributen används inte för att sätta
+      storlek (det gör höjdklassen och w-auto) utan för att ge kvoten
+      1.7768 innan bilden hämtats, så rutan reserveras och kall laddning
+      ger noll layoutförskjutning.
+
+      Höjderna är satta efter BREDDEN, inte höjden. Den förra loggan var
+      1.5:1 och stod i h-24/lg:h-32 = 144/192 px bred. En lockup på
+      1.7768:1 i samma höjd hade blivit 171/227 px och tagit över första
+      skärmen. h-20/lg:h-28 ger 142/199 px — samma optiska fotavtryck som
+      förut, 16 px lägre.
+    */}
     <div class="reveal [--delay:0s] mb-14 lg:mb-20">
       <img
-        src="/nordclean-logo.webp"
+        src="/kronoclean-logo.webp"
         alt={COMPANY.name}
-        width="1536"
-        height="1024"
+        width="1672"
+        height="941"
         fetchpriority="high"
         decoding="async"
-        class="h-24 w-auto lg:h-32"
+        class="h-20 w-auto lg:h-28"
       />
     </div>
 
@@ -54,30 +66,42 @@ const svarstid = responsePromise();
         </h1>
 
         {/*
-          Alternativ H1 med differentieringen inbakad. Byt in om ni hellre
-          vill leda med den — men den kräver fyra rader på desktop.
-          OBS: ta bort h1:an ovan om denna byts in, annars får sidan två h1.
+          H1 leder med hemstädning, inte med alla fem tjänsterna. En rubrik
+          rymmer en tjänst plus en ort, och det är den kombinationen som
+          kan ranka — "städtjänster i Växjö" rankar på ingenting.
 
-          <h1 id="hero-rubrik" class="...">
-            Hemstädning i {COMPANY.city}.<br />
-            <span class="text-sky">Alltid samma person.</span>
-          </h1>
+          Valet föll på hemstädning för att argumentet nedan är ett
+          ÅTERKOMMANDE-argument. Att någon annan kommer när en blir sjuk
+          betyder något när städningen sker varannan vecka i två år. Vid
+          en engångsflyttstädning bokar man ett datum och bryr sig inte.
+          Flyttstäd, dödsbo, kontor och hotell finns i SERVICES och får
+          egna sidor — de ska inte trängas in i H1.
         */}
 
         {/*
-          Utan bekräftat förnamn byts meningen mot en variant som säger
-          samma sak utan att hitta på ett namn. Poängen — en person, samma
-          varje gång — överlever båda formuleringarna.
+          ARGUMENTET, och varför det är omvänt mot vad som stod här förut.
+
+          Här stod "samma städning av samma person varje gång". Det var
+          osant — Kronoclean är ett familjeföretag med flera städare som
+          turas om — och det var dessutom fel argument. En ensam städare
+          KAN inte lova kontinuitet: blir hon sjuk blir det ingen städning
+          alls, och kunden får städa själv inför helgen. Att vara flera är
+          alltså inte en eftergift man måste förklara bort, det är den
+          enda fördel ett litet företag delar med Hemfrid.
+
+          Utan bekräftat förnamn byts första meningen mot en variant utan
+          namn. Familjeargumentet överlever båda formuleringarna.
         */}
         <p
           class="reveal [--delay:0.2s] mt-6 max-w-lg text-lg leading-relaxed text-slate"
         >
           {
             namn
-              ? `Jag heter ${namn} och driver ${COMPANY.name}.`
-              : `Jag driver ${COMPANY.name} själv.`
-          } Du får samma städning av samma person varje gång — ingen
-          roterande personal, inga främmande ansikten i hallen.
+              ? `Jag heter ${namn} och driver ${COMPANY.name} tillsammans med min familj.`
+              : `${COMPANY.name} drivs av en familj, inte av en person.`
+          } Vi är flera städare som turas om — och det är hela poängen:
+          blir en av oss sjuk kommer någon annan. Hos en ensam städare
+          blir det en avbokning.
         </p>
 
         {/*
@@ -138,29 +162,40 @@ const svarstid = responsePromise();
       {/* Höger: porträttyta. Vitt kort som lyfter ur mist-bakgrunden. */}
       <div class="reveal [--delay:0.44s] lg:col-span-5">
         <div
-          class="relative aspect-[4/5] overflow-hidden rounded-2xl border border-line bg-white shadow-[0_1px_3px_rgba(22,56,92,0.04),0_12px_32px_-12px_rgba(22,56,92,0.12)]"
+          class="relative aspect-[4/5] overflow-hidden rounded-2xl border border-line bg-white shadow-[0_1px_3px_rgba(0,40,129,0.04),0_12px_32px_-12px_rgba(0,40,129,0.12)]"
         >
           {/* TODO: ersätt hela detta block med <img> när fotot finns */}
           <div
             class="absolute inset-0 flex flex-col items-center justify-center px-8 text-center"
           >
+            {/*
+              Två figurer, inte en. Ikonen är dekor och aria-hidden, men en
+              ensam silhuett under texten "foto på familjen" är samma
+              osanning som meningen den ersatte — bara ritad i stället för
+              skriven.
+            */}
             <svg
               class="mb-4 h-10 w-10 text-sky-wash"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
             >
-              <circle cx="12" cy="9" r="3.5" stroke="currentColor" stroke-width="1.5" />
+              <circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.5" />
               <path
-                d="M4.5 20a7.5 7.5 0 0 1 15 0"
+                d="M1.5 20a7.5 7.5 0 0 1 15 0"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+              <circle cx="17" cy="10.5" r="2.75" stroke="currentColor" stroke-width="1.5" />
+              <path
+                d="M15 20a6 6 0 0 1 7.5-5.8"
                 stroke="currentColor"
                 stroke-width="1.5"
                 stroke-linecap="round"
               />
             </svg>
-            <p class="font-sans text-sm text-slate">
-              {namn ? `Foto på ${namn} kommer här` : 'Foto kommer här'}
-            </p>
+            <p class="font-sans text-sm text-slate">Foto på familjen kommer här</p>
           </div>
         </div>
       </div>

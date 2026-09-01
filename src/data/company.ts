@@ -1,5 +1,5 @@
 /**
- * Nordclean — single source of truth.
+ * Kronoclean — single source of truth.
  *
  * Allt som kan ändras eller som ännu inte är bekräftat bor här.
  * Hårdkoda aldrig telefonnummer, orter eller priser i komponenterna.
@@ -23,14 +23,20 @@
  */
 
 export const COMPANY = {
-  name: 'Nordclean',
+  name: 'Kronoclean',
   tagline: 'Rent · Fräscht · Pålitligt',
 
   /** TODO: bekräfta vilket nummer som ska ligga live */
   phone: '070-000 00 00',
   phoneHref: 'tel:+46700000000',
 
-  /** TODO: hennes förnamn — används i hero och om-sektionen */
+  /**
+   * TODO: förnamnet på den i familjen som står som ägare och är den
+   * kunden pratar med. Renderas i hero, i meningen "Jag heter NN och
+   * driver Kronoclean tillsammans med min familj" — alltså som
+   * KONTAKTPERSON, inte som den enda som städar. Fyll aldrig i ett namn
+   * här som en formulering längre ned gör till ensam utförare igen.
+   */
   ownerFirstName: 'NN',
 
   /** TODO: org.nr till sidfot och juridiska sidor */
@@ -38,7 +44,7 @@ export const COMPANY = {
 
   city: 'Växjö',
 
-  /** TODO: bekräfta orterna. Hon ska få stryka det hon inte kör till. */
+  /** TODO: bekräfta orterna. De ska få stryka det de inte kör till. */
   areas: ['Växjö', 'Alvesta', 'Rottne', 'Lammhult'],
 
   /**
@@ -51,7 +57,7 @@ export const COMPANY = {
   /** RUT 2026: 50 % av arbetskostnaden, tak 75 000 kr/person/år */
   rutPercent: 50,
 
-  /** TODO: svarstid — bara om hon faktiskt kan hålla den */
+  /** TODO: svarstid — bara om de faktiskt kan hålla den */
   responsePromise: 'Svarar oftast samma dag',
 
   /**
@@ -67,19 +73,21 @@ export const COMPANY = {
   areasConfirmed: false,
   responsePromiseConfirmed: false,
 
-  /** Hon städar hemma hos kund. Ingen publik besöksadress finns i dag. */
+  /** De städar hemma hos kund. Ingen publik besöksadress finns i dag. */
   addressConfirmed: false,
 
-  /** true först när /public/og-nordclean.jpg (1200x630) faktiskt finns. */
+  /** true först när /public/og-kronoclean.jpg (1200x630) faktiskt finns. */
   ogImageConfirmed: false,
 
   /**
-   * TODO: true först när nordclean.se faktiskt är registrerad och hennes.
-   * Detta är värre än en platshållartelefon — det är en EXTERN referens.
+   * kronoclean.se är registrerad och företagets egen. Vänd 2026-09-01.
+   *
+   * Detta är den enda flaggan i listan som gatar en EXTERN referens:
    * canonical, og:url, sitemapens loc och JSON-LD:ns @id pekar alla dit.
-   * Registrerar någon annan domänen pekar sajten aktivt på dem.
+   * Går domänen någonsin förlorad ska den vändas tillbaka till false
+   * innan nästa bygge — sajten skulle annars peka på den som tar över.
    */
-  domainConfirmed: false,
+  domainConfirmed: true,
 } as const;
 
 /**
@@ -88,7 +96,7 @@ export const COMPANY = {
  * assertRedoForProduktion().
  *
  * Medvetet UTANFÖR listan, och varför:
- *   addressConfirmed  Hon städar hemma hos kund. false är det permanent
+ *   addressConfirmed  De städar hemma hos kund. false är det permanent
  *                     rätta svaret, inte ett ofärdigt tillstånd.
  *   ogImageConfirmed  Har en sann fallback (loggan). Inget osant renderas.
  *   orgNrConfirmed    Renderas ingenstans än, och ska aldrig in i JSON-LD.
@@ -96,8 +104,8 @@ export const COMPANY = {
  */
 const LANSERINGSSPARRAR: ReadonlyArray<readonly [string, boolean, string]> = [
   ['phoneConfirmed', COMPANY.phoneConfirmed, 'telefonnumret — sidans enda konvertering'],
-  ['ownerNameConfirmed', COMPANY.ownerNameConfirmed, 'ägarens förnamn — renderas i hero och fotokortet'],
-  ['responsePromiseConfirmed', COMPANY.responsePromiseConfirmed, 'svarstidslöftet — ett löfte hon måste kunna hålla'],
+  ['ownerNameConfirmed', COMPANY.ownerNameConfirmed, 'kontaktpersonens förnamn — renderas i hero'],
+  ['responsePromiseConfirmed', COMPANY.responsePromiseConfirmed, 'svarstidslöftet — ett löfte de måste kunna hålla'],
   ['domainConfirmed', COMPANY.domainConfirmed, 'domänen — canonical, og:url, sitemap och JSON-LD pekar dit'],
 ];
 
@@ -241,18 +249,18 @@ const loggaByggkontext = (kontext: Byggkontext): void => {
   const visa = (namn: string) => env(namn) ?? '(saknas)';
 
   console.log(
-    `[nordclean] byggkontext=${kontext}` +
+    `[kronoclean] byggkontext=${kontext}` +
       ` platshållare=${harObekraftadeUppgifter() ? 'ja' : 'nej'}` +
       ` noindex=${skaNoindexas() ? 'ja' : 'nej'}`,
   );
   console.log(
-    `[nordclean] process.env: CF_PAGES=${visa('CF_PAGES')}` +
+    `[kronoclean] process.env: CF_PAGES=${visa('CF_PAGES')}` +
       ` CF_PAGES_BRANCH=${visa('CF_PAGES_BRANCH')}` +
       ` CF_PAGES_COMMIT_SHA=${env('CF_PAGES_COMMIT_SHA') ? 'satt' : '(saknas)'}` +
       ` CI=${visa('CI')}`,
   );
   console.log(
-    `[nordclean] synliga CF_*/CI-nycklar: ` +
+    `[kronoclean] synliga CF_*/CI-nycklar: ` +
       `${nycklar.length ? nycklar.join(', ') : '(inga)'}`,
   );
 };
@@ -353,19 +361,131 @@ export const serviceAreas = (): string[] =>
   COMPANY.areasConfirmed ? [...COMPANY.areas] : [];
 
 /* ------------------------------------------------------------------ */
+/* TJÄNSTER                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Sajten är en one-pager i dag. Tjänsterna ligger ändå som data, inte som
+ * text i markup, av ett enda skäl: var och en ska kunna bli
+ * /tjanster/<slug> utan att något byggs om. Ett <li> i en sektion går
+ * inte att rendera en egen sida ur.
+ *
+ * `slug` är därför inte en formatering av namnet utan tjänstens identitet.
+ * Den blir en URL, och en URL som ändras efter lansering kostar
+ * placeringar. Bestäm den här, en gång, medan den ännu är gratis.
+ * Slugarna är ASCII: ä och ö i en URL blir procentkodade och oläsbara
+ * när de klistras in.
+ */
+
+/**
+ * De två affärerna. Skilda kundtyper, skild prislogik, samma sida.
+ *
+ * RUT sitter på SEGMENTET, inte på tjänsten. Det är inte en förenkling
+ * utan hur avdraget faktiskt fungerar: det följer KÖPAREN — en fysisk
+ * person med skatt att dra av — inte vilken sorts städning som utförs.
+ * Ett företag får inget RUT för hemstädning heller. Modelleras rut som
+ * ett fält per tjänst inbjuder strukturen till att någon sätter
+ * `rut: true` på kontorsstädning den dag ett aktiebolag frågar.
+ */
+export const SEGMENT = {
+  privat: {
+    id: 'privat',
+    /** Rubrik när de två affärerna ska skiljas åt visuellt. */
+    label: 'För dig hemma',
+    audience: 'Privatperson',
+    rut: true,
+  },
+  foretag: {
+    id: 'foretag',
+    label: 'För företag',
+    audience: 'Företag',
+    rut: false,
+  },
+} as const;
+
+export type SegmentId = keyof typeof SEGMENT;
+
+/**
+ * Ordningen är avsiktlig och är den ordning de ska renderas i: de tre
+ * privata först, företagstjänsterna sist. Sortera aldrig listan i en
+ * komponent — då flyttar prioriteringen ut ur datafilen.
+ */
+export const SERVICES = [
+  {
+    slug: 'hemstadning',
+    name: 'Hemstädning',
+    segment: 'privat',
+  },
+  {
+    slug: 'flyttstadning',
+    name: 'Flyttstädning',
+    segment: 'privat',
+  },
+  {
+    slug: 'dodsbostadning',
+    name: 'Dödsbostädning',
+    segment: 'privat',
+    /**
+     * Egen ton, inte bara eget innehåll. Den som söker dödsbostädning har
+     * nyligen förlorat någon. Språket från hemstäd — fräscht, effektivt,
+     * boka enkelt — landar fel och läser som okänsligt. Flaggan finns här
+     * så att en framtida sektion eller sida kan välja rätt register i
+     * stället för att ärva standardtonen av misstag.
+     */
+    varsamTon: true,
+  },
+  {
+    slug: 'kontorsstadning',
+    name: 'Kontorsstädning',
+    segment: 'foretag',
+  },
+  {
+    slug: 'hotellstadning',
+    name: 'Hotellstädning',
+    segment: 'foretag',
+  },
+] as const;
+
+export type Service = (typeof SERVICES)[number];
+
+/** Gäller RUT för den här tjänsten? Härlett ur segmentet, aldrig satt. */
+export const hasRut = (service: Service): boolean =>
+  SEGMENT[service.segment].rut;
+
+/** Tjänsterna i ett segment, i datafilens ordning. */
+export const servicesIn = (segment: SegmentId): Service[] =>
+  SERVICES.filter((s) => s.segment === segment);
+
+/**
+ * Framtida sidas URL. Ligger här och inte i en komponent så att slugen
+ * har en enda källa den dag /tjanster/[slug].astro faktiskt finns.
+ */
+export const servicePath = (service: Service): string =>
+  `/tjanster/${service.slug}`;
+
+/* ------------------------------------------------------------------ */
 /* SEO                                                                */
 /* ------------------------------------------------------------------ */
 
 export const SEO = {
-  title: 'Hemstädning i Växjö — Nordclean',
+  title: 'Hemstädning i Växjö — Kronoclean',
+  /**
+   * Ledde tidigare med "Samma person varje gång" — samma osanning som
+   * stod i heron. Ersatt av det som faktiskt skiljer ett familjeföretag
+   * från en ensam städare, och som dessutom är det enda argumentet en
+   * kund inte kan få av en soloföretagare.
+   *
+   * 124 tecken. Google klipper runt 155 på desktop och kortare på mobil,
+   * så meningen som bär argumentet ligger före "Ring för bokning".
+   */
   description:
-    'Hemstädning i Växjö med RUT-avdrag. Samma person varje gång. Ring för bokning.',
+    'Hemstädning i Växjö med RUT-avdrag. Familjeföretag med flera städare — blir någon sjuk kommer någon annan. Ring för bokning.',
   locale: 'sv_SE',
   /** Matchar --color-mist i global.css så webbläsarfältet smälter in. */
   themeColor: '#EEF4F9',
-  logoPath: '/nordclean-logo.webp',
-  ogImagePath: '/og-nordclean.jpg',
-  ogImageAlt: 'Nordclean — hemstädning i Växjö',
+  logoPath: '/kronoclean-logo.webp',
+  ogImagePath: '/og-kronoclean.jpg',
+  ogImageAlt: 'Kronoclean — hemstädning i Växjö',
 } as const;
 
 /**
@@ -392,7 +512,7 @@ export const ogImageUrl = (site: URL | undefined): string =>
  *
  * Typval: Organization, inte LocalBusiness. Googles LocalBusiness-doc har
  * en required-tabell med exakt två rader, address och name, och address
- * beskrivs som verksamhetens fysiska plats. Nordclean har ingen — hon
+ * beskrivs som verksamhetens fysiska plats. Kronoclean har ingen — de
  * städar hemma hos kund. Utan address är LocalBusiness inte berättigad
  * till rich result ändå, så märkningen skulle bara rapportera ett saknat
  * obligatoriskt fält i Search Console. Organization har inga
@@ -448,9 +568,17 @@ export const buildStructuredData = (site: URL | undefined): JsonLdNode => {
   const graph: JsonLdNode[] = [organization];
 
   /**
-   * Service-noden finns bara för areaServed — det är där ett
-   * leveransområde semantiskt hör hemma. Utan bekräftade orter har noden
-   * inget innehåll och utelämnas helt.
+   * En Service-nod per tjänst, genererad ur SERVICES. Namnet stod
+   * tidigare hårdkodat som 'Hemstädning' i en enda nod — grafen påstod
+   * alltså att företaget gör en sak när det gör fem.
+   *
+   * Noden finns fortfarande bara för areaServed — det är där ett
+   * leveransområde semantiskt hör hemma. Utan bekräftade orter har
+   * noderna inget innehåll och utelämnas helt.
+   *
+   * @id använder tjänstens slug, samma sträng som servicePath(). Den
+   * dagen /tjanster/<slug> finns pekar fragmentet redan rätt och kan
+   * bytas mot en absolut URL utan att identiteten ändras.
    *
    * areaServed förekommer noll gånger i Googles stödda mängd för både
    * LocalBusiness och Organization. Det är ren schema.org-semantik med
@@ -458,21 +586,25 @@ export const buildStructuredData = (site: URL | undefined): JsonLdNode => {
    * Det reglaget är serviceområdet i Google Företagsprofil.
    */
   if (areas.length > 0) {
-    graph.push({
-      '@type': 'Service',
-      '@id': `${base}#hemstadning`,
-      name: 'Hemstädning',
-      serviceType: 'Hemstädning',
-      provider: { '@id': orgId },
-      areaServed: areas.map((area) => ({
-        '@type': 'City',
-        name: area,
-        containedInPlace: {
-          '@type': 'AdministrativeArea',
-          name: 'Kronobergs län',
-        },
-      })),
-    });
+    const areaServed = areas.map((area) => ({
+      '@type': 'City',
+      name: area,
+      containedInPlace: {
+        '@type': 'AdministrativeArea',
+        name: 'Kronobergs län',
+      },
+    }));
+
+    for (const service of SERVICES) {
+      graph.push({
+        '@type': 'Service',
+        '@id': `${base}#${service.slug}`,
+        name: service.name,
+        serviceType: service.name,
+        provider: { '@id': orgId },
+        areaServed,
+      });
+    }
   }
 
   return { '@context': 'https://schema.org', '@graph': graph };

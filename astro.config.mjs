@@ -5,15 +5,12 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   /**
-   * OBS: domänen är ännu inte registrerad. Den kan inte tas bort härifrån
-   * — @astrojs/sitemap kräver `site`, och absoluteUrl() kastar utan den —
-   * så spärren ligger i stället på COMPANY.domainConfirmed i
-   * src/data/company.ts, som stoppar produktionsbygget tills domänen är
-   * hennes. Detta är värre än en platshållartelefon: canonical, og:url,
-   * sitemapens loc och JSON-LD:ns @id pekar alla hit, så registrerar
-   * någon annan nordclean.se pekar sajten aktivt på dem.
+   * Domänen är registrerad och företagets egen. Spärren ligger kvar på
+   * COMPANY.domainConfirmed i src/data/company.ts — den är vänd, men
+   * kopplingen består: canonical, og:url, sitemapens loc och JSON-LD:ns
+   * @id pekar alla hit, så byts domänen ut måste flaggan följa med.
    */
-  site: 'https://nordclean.se',
+  site: 'https://kronoclean.se',
 
   integrations: [sitemap()],
 
