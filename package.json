@@ -10,7 +10,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "deploy": "astro build && wrangler versions upload --preview-alias $WORKERS_CI_BRANCH"
+    "deploy": "astro build && wrangler versions upload --preview-alias $WORKERS_CI_BRANCH",
+    "ikoner": "node scripts/generera-ikoner.mjs",
+    "og": "node scripts/generera-og.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
@@ -19,6 +21,8 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "fontkitten": "1.0.3",
+    "sharp": "0.35.4",
     "wrangler": "^4.128.0"
   },
   "allowScripts": {
