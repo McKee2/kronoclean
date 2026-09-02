@@ -74,6 +74,91 @@ const svarstid = responsePromise();
         </h1>
 
         {/*
+          ==============================================================
+          VERSALVARIANTEN — UTRÄKNAD OCH INTE APPLICERAD
+          ==============================================================
+          "HEMSTÄDNING I VÄXJÖ" provades mot raden ovan. Skissen ligger
+          här som tal, inte som kod: allt som krävs för att slå på den
+          står nedan, och det är tre attributvärden.
+
+          INSTRUMENT SERIFS EGNA MÅTT, mätta med canvas TextMetrics på
+          den laddade filen (100 px, andel av em):
+
+            versalhöjd H   0.72     stapel d     0.74
+            x-höjd x       0.51     underhäng p  0.21
+            Ä (prickarna)  0.92     Å (ringen)   0.99
+
+          Ä på 0.92 och Å på 0.99 är det som gör versaler kinkiga i det
+          här snittet: de går nästan upp till em-rutans tak. På EN rad
+          spelar det ingen roll — leading-[1.08] rymmer 0.92 med marginal
+          och versaler har inga underhäng alls. På TVÅ rader blir
+          luftrummet 1.08 - 0.92 = 0.16 em, alltså 5,8 px vid 36 px.
+          Ingen kollision, men raderna läser som ett block.
+
+          BREDDEN ÄR LINJÄR och går att räkna: en versalrad är
+          S * (7.9306 + 19t) px bred, där S är storleken och t är
+          spärren i em. 7.9306 är strängens bredd i em vid noll spärr,
+          och 19 är antalet tecken — webbläsaren lägger spärr även efter
+          det sista, så det är 19 luckor och inte 18.
+
+          VID 320 ÄR MÅTTET 272 px, och det är där versaler kostar. Ur
+          formeln: största storlek som håller EN rad är
+
+            t = 0.02em  ->  32.7 px        t = 0.03em  ->  32.0 px
+            t = 0.04em  ->  31.3 px
+
+          Uppmätt, inte bara räknat: 36 px + 0.02em blir 298.2 px och
+          bryter till HEMSTÄDNING I / VÄXJÖ (rader 206 och 74 px).
+          32 px + 0.02em blir 266.0 px — en rad, 6,0 px luft kvar.
+
+          RADBRYTNINGSFRÅGAN ÄR INTE EN SKILLNAD MELLAN VARIANTERNA.
+          Orten kommer ur COMPANY.city, och vid 320 bryter BÅDA till två
+          rader så fort orten växer med två tecken. Mätt: "Hemstädning i
+          Ljungby." och "Hemstädning i Älmhult." ger två rader i dagens
+          gemena 36 px, precis som versalerna gör i 32 px + 0.02em.
+          Dagens rubrik ryms på en rad med 15,5 px till godo — den är
+          alltså redan en radbrytning från kanten, och det är ett
+          befintligt villkor som versalerna varken skapar eller lagar.
+
+          FÖRSLAGET, om varianten ska in:
+
+            storlek   32 / 42 / 54 px  (text-[2rem] sm:text-[2.625rem]
+                                        lg:text-[3.375rem])
+            spärr     0.02em           (tracking-[0.02em])
+            punkten   utgår
+            leading   1.08, oförändrad
+
+          STORLEKEN SJUNKER 11 %, OCH DET ÄR INTE EN EFTERGIFT ÅT 320.
+          En gemen rad har sin massa på x-höjden 0.51; en versalrad har
+          varenda tecken på 0.72. Vid samma storlek blir versalraden
+          alltså 1,41 gånger tätare och tar över sidan. 0,89 gånger
+          storleken ger samma närvaro: mätt vid 1440 är gemena 60 px
+          427.5 px bred och 64.8 px hög, versaler 54 px + 0.02em är
+          448.8 px bred och 58.3 px hög — 5 % bredare och 10 % lägre.
+          Rubriken byter alltså höjd mot bredd, vilket är precis vad man
+          vill ha av versaler.
+
+          SPÄRREN 0.02 OCH INTE 0 ELLER 0.04. Renderat och tittat på:
+          vid 0 sitter versalerna redan hyggligt — snittet har generösa
+          sidosträckor — men VÄ och XJ knyter ihop sig. Vid 0.04 börjar
+          raden läsa som en ETIKETT, och där ligger redan taglinen på
+          0.22em rakt ovanför. Två spärrade versalrader i rad, 8 px
+          isär, hade gjort dem till samma sorts sak. 0.02 öppnar utan
+          att byta register.
+
+          VARFÖR DEN INTE ÄR APPLICERAD. Det är inte ett typografiskt
+          argument utan ett tonargument, och det är därför det är
+          kundens och inte mitt. Dagens rubrik är en MENING, med punkt,
+          och hela sidan talar så: "Du ringer", "Vi städar", "Jag heter
+          X och driver Kronoclean tillsammans med min familj". Versaler
+          utan punkt är en SKYLT. Skylten är snyggare och tar mer plats;
+          meningen låter som en människa. Sidans centrala påstående är
+          att det här är en familj och inte ett företag, och det
+          argumentet bärs av rösten.
+
+          Båda fungerar. Talen ovan är allt som behövs för att byta.
+          ==============================================================
+
           H1 leder med hemstädning, inte med alla fem tjänsterna. En rubrik
           rymmer en tjänst plus en ort, och det är den kombinationen som
           kan ranka — "städtjänster i Växjö" rankar på ingenting.
