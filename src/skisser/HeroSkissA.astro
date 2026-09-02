@@ -1,0 +1,209 @@
+---
+import {
+  COMPANY,
+  trustMarkers,
+  telefonVy,
+  ownerFirstName,
+  responsePromise,
+} from '../data/company';
+import StandInFoto from './StandInFoto.astro';
+
+/**
+ * SKISS (a) — FOTO BAKOM HELA HERON, TEXT OVANPÅ.
+ * Uppdaterad till nuvarande tokens. INTE APPLICERAD, och den bör inte
+ * bli det — se de tre skälen nedan.
+ *
+ * ==================================================================
+ * VAD SOM VAR DÖTT I DEN GAMLA SKISSEN
+ * ==================================================================
+ * Två sorters döda namn, döda av olika skäl:
+ *
+ *   1. PALETTNAMN SOM ALDRIG BLEV UTILITIES. text-navy, text-slate,
+ *      text-sky-text, bg-mist, border-linje. Paletten ligger utanför
+ *      @theme just för att inte generera klasser — de kompilerar till
+ *      ingenting, och texten ärver då sin färg i stället för att sättas.
+ *      Översättning till ytrollerna på mörk yta:
+ *
+ *        text-navy       -> text-pa-navy-rubrik
+ *        text-slate      -> text-pa-navy-brod
+ *        text-sky-text   -> text-pa-navy-accent-liten
+ *        text-sky        -> text-pa-navy-ikon
+ *        border-linje    -> border-pa-navy-linje
+ *        bg-mist         -> ytklassen .yta-mist
+ *
+ *   2. YTAN SJÄLV. .yta-navy och pa-navy-* finns kvar i global.css men
+ *      används inte av någon sektion sedan 2026-09-02. Den här skissen är
+ *      alltså den enda platsen på sidan där de sju tokens tas i bruk igen.
+ *
+ * ==================================================================
+ * KONTRASTGARANTIN, OMRÄKNAD
+ * ==================================================================
+ * Den gamla garantin räknades mot navy-deep som en ogenomskinlig yta.
+ * Bakom ett foto är ytan inte navy-deep utan KOMPOSITEN av skrim och
+ * foto, och den är ljusare. Räknat i sRGB per kanal, precis som
+ * webbläsaren komponerar, med värsta fall = en vit fotopixel:
+ *
+ *   skrim   brod(frost)  accent-liten(sky-lyft)  rubrik(vit)  ikon
+ *   0.70       3.70              2.59               6.42      2.59
+ *   0.80       5.19              3.63               9.01      3.63
+ *   0.90       7.13              4.99              12.37      4.99
+ *   0.901      7.15              5.00              12.40      5.00
+ *   1.00       9.11              6.38              15.81      6.38
+ *
+ * Bindande roll är accent-liten (taglinen), som kräver 5.0. Minsta skrim
+ * som håller ALLA roller över ett okänt foto: 0.901.
+ *
+ * Skrimmet nedan står på 0.90 — strax under kravet, med flit, så att
+ * skissen visar det ärliga fallet: vid 0.90 ligger taglinen på 4.99 och
+ * missar 5.0. Ett skrim som HÅLLER garantin är alltså ännu tätare än det
+ * du ser här.
+ *
+ * Ljus slöja i stället (mist över fotot, mörk text) är sämre, inte
+ * bättre. Värsta fall är då en svart fotopixel:
+ *
+ *   slöja   brod(slate)  accent-liten(sky-text)
+ *   0.85       5.02             4.98
+ *   0.90       5.66             5.60
+ *   1.00       7.07             7.01
+ *
+ * 0.852 räcker till rollernas minimikrav — men sidans text ligger sedan
+ * 2026-09-02 på 7.0, inte på 5.0, och för 7.0 krävs slöja 0.996. Fotot
+ * syns då till 0,4 %. En ljus slöja kan inte bära (a).
+ *
+ * ==================================================================
+ * TRE SKÄL, OCH DE PEKAR ÅT SAMMA HÅLL
+ * ==================================================================
+ * 1. ARITMETIKEN. En garanti mot ett OKÄNT foto tvingar skrimmet till
+ *    0.901 (mörkt) eller 0.996 (ljust). Vid 0.90 är fotot 10 % synligt.
+ *    Det är inte "heron bär en stor bild", det är en mörk yta med
+ *    struktur i.
+ *
+ * 2. YTAN. Den mörka ytan avvecklades för att MÖRKRET var problemet,
+ *    inte nyansen. (a) återinför den i sidans största fält, högst upp,
+ *    med de sju pa-navy-tokens plus en åttonde som inte finns: skrimmet
+ *    är en yta och skulle behöva en egen token.
+ *
+ * 3. LOGGAN HAR INGEN LJUS VARIANT. Mätt i filen, 400 114 ogenomskinliga
+ *    pixlar: 47,7 % ligger i ljushetsintervallet 0–0,1 och 29,7 % ligger
+ *    inom 0,02 i ljushet från navy-deep. Mörkaste pixeln (#000243) får
+ *    kvoten 1,22:1 mot navy-deep. Ungefär en tredjedel av loggan
+ *    försvinner in i ytan. Det syns nedan, och det är inte ett fel i
+ *    skissen utan i förslaget.
+ *
+ * SLUTSATS: (a) är diskvalificerad. Skäl 1 ensamt räcker.
+ */
+const markers = trustMarkers('privat');
+const telefon = telefonVy();
+const namn = ownerFirstName();
+const svarstid = responsePromise();
+---
+
+<section
+  class="yta-navy skiss-a relative isolate overflow-hidden pt-10 pb-20 lg:pt-14 lg:pb-28"
+  aria-labelledby="skiss-a-rubrik"
+>
+  {/* Fotot. yta-navy under det är inte dekoration: laddar bilden inte är
+      ytan fortfarande navy-deep, och garantin håller ändå. */}
+  <StandInFoto class="absolute inset-0 -z-10 h-full w-full" />
+  <div class="skrim absolute inset-0 -z-10"></div>
+
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    {/* Samma logga som på sidan. Se skäl 3 — den har ingen ljus variant,
+        och det här är exakt hur den ser ut på en mörk yta. */}
+    <div class="mb-14 lg:mb-20">
+      <img
+        src="/kronoclean-logo.webp"
+        alt={COMPANY.name}
+        width="1672"
+        height="941"
+        class="h-20 w-auto lg:h-28"
+      />
+    </div>
+
+    <div class="max-w-2xl">
+      <p
+        class="mb-5 font-sans text-xs font-semibold tracking-[0.22em] text-pa-navy-accent-liten uppercase"
+      >
+        {COMPANY.tagline}
+      </p>
+
+      <h1
+        id="skiss-a-rubrik"
+        class="font-display text-4xl leading-[1.08] text-pa-navy-rubrik sm:text-5xl lg:text-6xl"
+      >
+        Hemstädning i {COMPANY.city}.
+      </h1>
+
+      <p class="mt-6 max-w-lg text-lg leading-relaxed text-pa-navy-brod">
+        {
+          namn
+            ? `Jag heter ${namn} och driver ${COMPANY.name} tillsammans med min familj.`
+            : `${COMPANY.name} drivs av en familj, inte av en person.`
+        } Vi är flera städare som turas om — och det är hela poängen: blir
+        en av oss sjuk kommer någon annan. Hos en ensam städare blir det
+        en avbokning.
+      </p>
+
+      {
+        telefon.lage !== 'dolt' && (
+          <div class="mt-10">
+            <p class="mb-2 font-sans text-sm text-pa-navy-brod">
+              {telefon.lage === 'bekraftat'
+                ? 'Ring så bokar vi en tid'
+                : 'Numret läggs in innan sidan går live'}
+            </p>
+            <p class="py-1 font-display text-4xl text-pa-navy-rubrik sm:text-5xl">
+              {telefon.text}
+            </p>
+            {svarstid && (
+              <p class="mt-3 font-sans text-sm text-pa-navy-brod">{svarstid}</p>
+            )}
+          </div>
+        )
+      }
+
+      <ul
+        class="mt-12 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-pa-navy-linje pt-6"
+      >
+        {
+          markers.map((marker) => (
+            <li class="flex items-center gap-2 font-sans text-sm text-pa-navy-brod">
+              <svg
+                class="h-4 w-4 shrink-0 text-pa-navy-ikon"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12l5 5L20 7"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              {marker}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  /**
+   * Skrimmet. 0.90 opacitet på navy-deep är exakt den komposit talen i
+   * huvudkommentaren är räknade på (per kanal i sRGB).
+   *
+   * Att raden läser --palett-navy-deep direkt är ett REGELBROTT och står
+   * kvar med flit: markup får bara röra @theme-lagret. Skälet till att
+   * regeln bryts är att skrimmet ÄR en yta, och den ytan har ingen token.
+   * Skulle (a) någonsin byggas är den åttonde tokenen det första som
+   * måste räknas fram — inte den här raden.
+   */
+  .skrim {
+    background: var(--palett-navy-deep);
+    opacity: 0.9;
+  }
+</style>

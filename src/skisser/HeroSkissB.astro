@@ -1,0 +1,267 @@
+---
+import {
+  COMPANY,
+  trustMarkers,
+  telefonVy,
+  ownerFirstName,
+  responsePromise,
+} from '../data/company';
+import StandInFoto from './StandInFoto.astro';
+
+/**
+ * SKISS (b) — LIGGANDE BAND UNDER TEXTEN, FULL SIDBREDD.
+ * Uppdaterad till nuvarande tokens. INTE APPLICERAD.
+ *
+ * ==================================================================
+ * VAD SOM VAR DÖTT I DEN GAMLA SKISSEN
+ * ==================================================================
+ * Samma paletthalka som i (a), grupp 1: text-navy, text-slate,
+ * text-sky-text, bg-mist, border-linje genererar inga utilities.
+ * Översättningen är kortare här, för (b) står kvar på mist och kan
+ * använda sidans vanliga roller rakt av:
+ *
+ *   text-navy      -> text-pa-mist-rubrik
+ *   text-slate     -> text-pa-mist-brod
+ *   text-sky-text  -> text-pa-mist-accent-liten
+ *   border-linje   -> border-pa-mist-linje
+ *
+ * (b) rör INTE pa-navy-*. Ingen ny yta, ingen ny token, ingen omräknad
+ * garanti: texten står på mist precis som i dag och behåller 11.02 /
+ * 7.07 / 7.01. Det är hela skillnaden mot (a).
+ *
+ * ==================================================================
+ * BANDET LIGGER UTANFÖR CONTAINERN, INTE I w-screen
+ * ==================================================================
+ * Full sidbredd görs genom att bandet är syskon till max-w-6xl-diven,
+ * inte genom w-screen + negativ marginal. Skälet är mätbart: w-screen är
+ * 100vw, och 100vw räknar IN den vertikala rullisten på desktop. På en
+ * sida som rullar ger det 15-17 px vågrät överskrollning. Ett syskon
+ * ärver <body>-bredden och kan inte bli för brett.
+ *
+ * ==================================================================
+ * BANDET SITTER FLUSH MOT SEKTIONENS UNDERKANT
+ * ==================================================================
+ * Sektionen har pb-0. Bandets underkant ÄR gränsen mellan hero och
+ * Tjänster, och den gränsen behöver därmed ingen avdelare: regeln i
+ * index.astro säger att en linje markerar en gräns som ytbytet inte gör,
+ * och ett fullbrett foto gör jobbet starkare än en linje. Det är också
+ * skälet till att bandet inte kan ligga mitt i heron — då blir det en
+ * illustration mitt i en text i stället för sektionens avslut.
+ *
+ * ==================================================================
+ * KRAV PÅ FOTOT
+ * ==================================================================
+ * PROPORTION. Bandet är 100 % brett och har fast höjd per brytpunkt:
+ * 192 / 240 / 320 / 384 px. Kvoten varierar därför enormt med bredden,
+ * och det är kvoten som styr hur mycket av bilden som överlever:
+ *
+ *   vy        band        kvot    synlig del av ett 3:2-original
+ *   320x192   1.67:1              90,0 %
+ *   390x192   2.03:1              73,8 %
+ *   640x240   2.67:1              56,3 %   (sm)
+ *   1024x320  3.20:1              46,9 %   (lg)
+ *   1280x384  3.33:1              45,0 %   (xl)
+ *   1440x384  3.75:1              40,0 %
+ *   1920x384  5.00:1              30,0 %
+ *
+ * object-fit: cover skalar efter BREDDEN i alla lägen (bandet är alltid
+ * bredare i kvot än originalet), så beskärningen sker uteslutande i höjd.
+ * Vågrätt syns alltid hela bilden.
+ *
+ * MÄTT I DEV, och det är (b):s svaga punkt: bandets överkant hamnar på
+ * y=824 vid 320x568 (helt under vikningen, 256 px ned), y=725 vid 390x844
+ * (119 px syns) och y=787 vid 1440x900 (113 px syns). Vid 320 bär heron
+ * alltså ingen bild förrän man rullar. Motmedlet — att flytta bandet
+ * ovanför texten under sm via flex order — är EN klass, men det trycker
+ * ned h1 med bandets höjd och gör DOM-ordning och visuell ordning olika.
+ * Inte gjort, inte gömt.
+ *
+ * MOTIVZON. Följer direkt ur tabellen: allt väsentligt måste ligga inom
+ * de mittersta 30 % av originalets HÖJD, alltså mellan 35 % och 65 %.
+ * Praktiskt formulerat för den som fotograferar:
+ *   - ögonlinjen på 42-58 % av bildhöjden (inte den vanliga tredjedeln
+ *     uppifrån — ett normalkomponerat gruppfoto får huvudena avklippta
+ *     vid 1440),
+ *   - halvbild, midjan och uppåt, 2-5 personer som fyller minst 60 % av
+ *     bildhöjden. Vid 320 px är bandet 320 px brett; en helbild ger då
+ *     ansikten på ~20 px, en halvbild ~40 px,
+ *   - inget väsentligt i de yttre 6 % åt vänster eller höger,
+ *   - object-position lämnas på center. Behöver en enskild bild flyttas
+ *     är det EN dokumenterad rad, men den raden är en eftergift: den
+ *     måste räknas om vid varje bildbyte.
+ *
+ * UPPLÖSNING. Källfil minst 3000 x 2000 px (3:2), obeskuren, ingen
+ * filtrering, ingen text i bilden. 3000 px täcker 1920 px vy vid DPR 1,5
+ * och 1440 px vy vid DPR 2 (2880 px). Levereras som src/assets/-fil och
+ * skalas av astro:assets till 640/960/1280/1920/2560 webp, sizes="100vw".
+ * Budget: största varianten <= 300 kB, 640-varianten <= 60 kB.
+ * loading="lazy" är rätt här — bandet ligger under vikningen i alla tre
+ * mätvyer — och höjden är låst i CSS, så CLS är 0 oavsett.
+ *
+ * INNEHÅLL, OCH DET ÄR INTE EN SMAKFRÅGA. Heron påstår "jag driver
+ * Kronoclean tillsammans med min familj". Ett stockfoto under den
+ * meningen gör sidans centrala påstående osant. Fotot måste föreställa de
+ * personer texten handlar om. Samtycke krävs från alla som syns, och från
+ * vårdnadshavare om barn syns. Vi behöver också veta vilka som är med för
+ * att kunna skriva alt-texten.
+ *
+ * ==================================================================
+ * PLATSHÅLLAREN TILLS FOTOT FINNS
+ * ==================================================================
+ * Platshållaren är ETT MIST-BAND MED HÅRSTRECK, inte ett vitt fält.
+ * Vitt provades i huvudet och förkastades: sidans rytm är mist · mist ·
+ * vit · mist · mist, ett enda avbrott mitt på sidan, och ett vitt band i
+ * heron hade lagt till ett andra vitt fält ovanför det — alternering, som
+ * är precis vad rytmen är byggd för att undvika. Platshållaren får inte
+ * kosta sidan sin struktur innan fotot ens finns.
+ *
+ * Den reserverar exakt samma höjder som bilden kommer att få, så bytet
+ * ger noll layoutförskjutning. Figuren är två gestalter, inte en, av
+ * samma skäl som porträttytan i dagens hero: en ensam silhuett under
+ * ordet "familjen" är samma osanning, bara ritad.
+ */
+interface Props {
+  /** true = visa den syntetiska stand-in-ytan i stället för platshållaren */
+  medFoto?: boolean;
+}
+const { medFoto = false } = Astro.props;
+
+const markers = trustMarkers('privat');
+const telefon = telefonVy();
+const namn = ownerFirstName();
+const svarstid = responsePromise();
+---
+
+<section class="yta-mist pt-10 pb-0 lg:pt-14" aria-labelledby="skiss-b-rubrik">
+  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    <div class="mb-14 lg:mb-20">
+      <img
+        src="/kronoclean-logo.webp"
+        alt={COMPANY.name}
+        width="1672"
+        height="941"
+        fetchpriority="high"
+        decoding="async"
+        class="h-20 w-auto lg:h-28"
+      />
+    </div>
+
+    {/* En kolumn i stället för 7/5. Utan porträttkortet till höger finns
+        ingen anledning att hålla texten i halva sidan — men brödtexten
+        behåller max-w-lg, radlängden är mätt och ska inte växa. */}
+    <div class="max-w-3xl">
+      <p
+        class="mb-5 font-sans text-xs font-semibold tracking-[0.22em] text-pa-mist-accent-liten uppercase"
+      >
+        {COMPANY.tagline}
+      </p>
+
+      <h1
+        id="skiss-b-rubrik"
+        class="font-display text-4xl leading-[1.08] text-pa-mist-rubrik sm:text-5xl lg:text-6xl"
+      >
+        Hemstädning i {COMPANY.city}.
+      </h1>
+
+      <p class="mt-6 max-w-lg text-lg leading-relaxed text-pa-mist-brod">
+        {
+          namn
+            ? `Jag heter ${namn} och driver ${COMPANY.name} tillsammans med min familj.`
+            : `${COMPANY.name} drivs av en familj, inte av en person.`
+        } Vi är flera städare som turas om — och det är hela poängen: blir
+        en av oss sjuk kommer någon annan. Hos en ensam städare blir det
+        en avbokning.
+      </p>
+
+      {
+        telefon.lage !== 'dolt' && (
+          <div class="mt-10">
+            <p class="mb-2 font-sans text-sm text-pa-mist-brod">
+              {telefon.lage === 'bekraftat'
+                ? 'Ring så bokar vi en tid'
+                : 'Numret läggs in innan sidan går live'}
+            </p>
+            <p class="py-1 font-display text-4xl text-pa-mist-rubrik sm:text-5xl">
+              {telefon.text}
+            </p>
+            {svarstid && (
+              <p class="mt-3 font-sans text-sm text-pa-mist-brod">{svarstid}</p>
+            )}
+          </div>
+        )
+      }
+
+      <ul
+        class="mt-12 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-pa-mist-linje pt-6"
+      >
+        {
+          markers.map((marker) => (
+            <li class="flex items-center gap-2 font-sans text-sm text-pa-mist-brod">
+              <svg
+                class="h-4 w-4 shrink-0 text-pa-mist-ikon"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12l5 5L20 7"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              {marker}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  {/*
+    BANDET. Syskon till containern ovan = full sidbredd utan w-screen.
+
+    När fotot finns byts hela innehållet i diven mot en rad:
+
+      <Image src={familjen} alt={...} widths={[640,960,1280,1920,2560]}
+             sizes="100vw" class="h-full w-full object-cover" loading="lazy" />
+
+    Höjdklasserna ligger på YTTERDIVEN och inte på bilden, så reservationen
+    är densamma före och efter bytet.
+  */}
+  <div class="mt-14 h-48 w-full overflow-hidden sm:h-60 lg:mt-20 lg:h-80 xl:h-96">
+    {
+      medFoto ? (
+        <StandInFoto class="h-full w-full" />
+      ) : (
+        <div class="flex h-full w-full flex-col items-center justify-center border-t border-b border-pa-mist-linje px-6 text-center">
+          <svg
+            class="mb-4 h-10 w-10 text-dekor-wash"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.5" />
+            <path
+              d="M1.5 20a7.5 7.5 0 0 1 15 0"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+            <circle cx="17" cy="10.5" r="2.75" stroke="currentColor" stroke-width="1.5" />
+            <path
+              d="M15 20a6 6 0 0 1 7.5-5.8"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <p class="font-sans text-sm text-pa-mist-brod">
+            Foto på familjen kommer här
+          </p>
+        </div>
+      )
+    }
+  </div>
+</section>
