@@ -214,6 +214,25 @@
   --palett-krom-avdelare: #819cbc; /* krom 2.017 — gräns mellan */
 
   /**
+   * SKRIMMET ÖVER HERO-FOTOT — samma färg som --palett-navy-deep, men
+   * skriven som RGB-KANALER. Dubbleringen är avsiktlig och går inte att
+   * undvika i CSS.
+   *
+   * Skrimmet är en GRADIENT, och en gradient måste ha samma RGB i båda
+   * ändar. Skrivs den ände som ska vara osynlig som `transparent` blir
+   * den rgba(0,0,0,0) — genomskinlig SVART — och webbläsaren
+   * interpolerar då mot svart på vägen. Resultatet är en grå slöja över
+   * fotots ljusaste del, exakt där bilden ska vara orörd.
+   *
+   * color-mix(... 0%, transparent) löser det inte: den ger också
+   * genomskinlig svart. Enda vägen är rgb(<kanaler> / <alfa>), och
+   * kanaler går inte att plocka ur ett hexvärde i CSS.
+   *
+   * ÄNDRAS --palett-navy-deep MÅSTE DEN HÄR RADEN FÖLJA MED.
+   */
+  --palett-skrim: 0 21 109; /* = --palett-navy-deep #00156D */
+
+  /**
    * Avdelare, en per yta. Samma optiska tyngd på alla tre: en linje som
    * är knappt synlig på mist blir påträngande på navy och tvärtom.
    *
@@ -298,6 +317,42 @@
      1.53 på vitt och läser då som en ram, inte som en avdelare. */
   --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.324 — inuti sektion */
   --color-pa-vitt-avdelare: var(--palett-avdelare-vit); /* 2.007 — mellan sektioner */
+
+  /* ---------------------------------------------------------------- */
+  /* YTA FOTO — rubriken och CTA:n som står PÅ hero-bilden.            */
+  /* ---------------------------------------------------------------- */
+  /**
+   * Ytan är skrim + foto, alltså en komposit vars färg beror på bilden.
+   * Det var invändningen mot hela konstruktionen en gång: en yta utan
+   * token går inte att räkna mot. Svaret är att räkna mot VÄRSTA FALLET
+   * i stället för mot ett medelvärde — en VIT fotopixel ger den ljusaste
+   * möjliga kompositen, och håller talet där håller det för varje bild.
+   *
+   * Vid skrimmets 0.60 blir den kompositen #6673A7. Mot den ger vitt
+   * 4.61, och mot en svart fotopixel 18.54. Sämsta värdet över hela
+   * fotospannet är alltså 4.61.
+   *
+   * DET RÄCKER BARA FÖR ATT INGEN LITEN TEXT LIGGER HÄR. Rubriken är
+   * stor text (kravet 3.0) och allt annat flyttade under bilden. Den
+   * gamla räkningen föll på taglinen: accent-liten mot navy-deep TAR
+   * SLUT på 6.38, alltså vid skrim 1.00 utan foto alls, mot ett krav på
+   * 7.0. Ingen skrimnivå nådde dit. Rollen står inte längre över fotot,
+   * och det är hela skillnaden.
+   *
+   * CTA:N HAR INGEN ROLL HÄR, och det är avsiktligt: knappen är OPAK
+   * vit, så dess etikett står på --palett-vit och använder pa-vitt-*
+   * precis som vilken text som helst på den vita ytan. Ingen komposit
+   * sker inuti en opak yta. Det var också skälet att välja en ljus
+   * knapp: en navy-deep knapp mot ett navy-deep skrim ger 1.13-1.24 och
+   * försvinner.
+   */
+  --color-pa-foto-rubrik: var(--palett-vit); /* 4.61 vid skrim 0.60, värsta fall */
+  /**
+   * Fokusringen kan INTE ärvas från den vita knappen. outline ritas
+   * UTANFÖR elementet, alltså på skrimmet och inte på knappen:
+   * pa-vitt-fokus (#034F94) ger 1.79 där. Vit ring ger 4.61.
+   */
+  --color-pa-foto-fokus: var(--palett-vit); /* 4.61 — se .hero-cta */
 
   /* ---------------------------------------------------------------- */
   /* YTA KROM — sidhuvudet och sidfoten. Sidans ram, inte en sektion.  */
