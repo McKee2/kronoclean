@@ -332,6 +332,90 @@ const svarstid = responsePromise();
     från vårdnadshavare om barn syns. Vi behöver veta vilka som är med för
     att kunna skriva alt-texten.
 
+    ==================================================================
+    OM HELA HERON SKA BLI EN BILD: (a) ÄR FORTFARANDE DÖD, (c) OCH (d)
+    ÄR VÄGARNA. INGEN AV DEM ÄR APPLICERAD.
+    ==================================================================
+    (a) var foto bakom hela heron med ett skrim över. Den avvisades på
+    två skäl. Ett av dem har fallit, det andra har blivit värre.
+
+    FALLET: loggan. Skälet var att loggan saknar ljus variant — 47,7 %
+    av dess bläck ligger i ljushet 0-0,1 och mörkaste pixeln får 1,22:1
+    mot navy-deep. Loggan står inte längre i heron. Den bor i
+    Sidhuvud.astro, på mist, och rör inte fotot.
+
+    KVAR OCH VÄRRE: aritmetiken. Räknat om själv, sRGB-komposit av
+    skrim över värsta fall en VIT fotopixel:
+
+      skrim   brod   accent-liten   rubrik
+      0.70    3.70       2.59        6.42
+      0.80    5.19       3.63        9.01
+      0.90    7.13       4.99       12.37
+      1.00    9.11       6.38       15.81
+
+    Bindande roll är accent-liten (taglinen). För rollens minimikrav
+    5.0 krävs skrim 0.9007 och fotot syns till 10 %. MEN sidans små
+    text ligger sedan kontrastpasset på 7.0, och accent-liten mot
+    navy-deep TAR SLUT på 6.38 — vid skrim 1.00, alltså utan foto alls.
+    Det finns ingen skrimnivå som når 7.0. (a) är inte dyr längre, den
+    är omöjlig utan en åttonde token.
+
+    "SIDAN HAR INGA MÖRKA YTOR KVAR — PÅVERKAR DET BEDÖMNINGEN?" Ja,
+    men åt fel håll. Invändningen mot mörker handlade aldrig om
+    växlingen mellan ytor — det var argumentet mot ett andra vitt fält.
+    Den handlade om mörkret självt, och om att skrimmet är en yta utan
+    token: dess färg är skrim + foto och beror alltså på bilden, ibland
+    på pixeln. Att pa-navy-* nu är helt oanvänt gör saken sämre, inte
+    bättre: heron skulle bli enda platsen där ett komplett andra
+    sjurollssystem gäller, för en sektion.
+
+    ------------------------------------------------------------------
+    (c) DELAD HERO — bilden BREDVID texten, ingen överlappning
+    ------------------------------------------------------------------
+    Från lg: text i vänsterkolumnen på mist, fotot i högerkolumnen med
+    full blödning ut till fönsterkanten. Under lg staplas det, fotot
+    under texten som i dag. Ingen text står på fotot, alltså inget
+    skrim, ingen ny token, och pa-mist-* gäller oförändrat.
+
+    Beskärningen är dess styrka. Synlig del av ett 3:2-original:
+
+      320  staplad   320x240   88,9 %      1024 kolumn  480x540  59,3 %
+      390  staplad   390x280   92,9 %      1440 kolumn  672x630  71,1 %
+                                           1920 kolumn  912x630  96,5 %
+
+    Sämsta läget är 59 % mot bandets 30 % vid 1920. Låses kolumnen i
+    stället till aspect-ratio 3/2 syns 100 % vid varje bredd — priset
+    är att kolumnen då inte fyller sektionens höjd.
+
+    ------------------------------------------------------------------
+    (d) OPAK TEXTPLATTA ÖVER HELBILD
+    ------------------------------------------------------------------
+    Fotot fyller hela heron, kant till kant. Texten står på en OPAK
+    mist-platta ovanpå — en avgränsad rektangel, inte en slöja. Just
+    för att den är opak sker ingen komposit: texten står på
+    --palett-mist precis som i dag, alla pa-mist-tal håller, ingen
+    åttonde yta. Fotot syns överallt där plattan inte är.
+
+    Störst bild av de tre på desktop, sämst beskärning på mobil:
+
+      vy         bildruta    synlig del   motivzon      fotot syns
+      320x568    320x760      28,1 %      36-64 % br      37,4 %
+      390x844    390x700      37,1 %      31-69 % br      37,4 %
+      1440x900  1440x700      72,9 %      14-86 % hö      71,8 %
+      1920x900  1920x700      54,7 %      23-77 % hö      78,9 %
+
+    Under sm måste plattan vara nästan full bredd, så fotot blir remsor
+    över och under den — (d) blir då (b) med bandet flyttat överst.
+    Och motivzonen 36-64 % av BREDDEN vid 320 är hårdare än den låter:
+    2-5 personer står bredvid varandra, så en breddspärr kostar mer än
+    en höjdspärr av samma storlek. Bandets 35-65 % gäller höjden.
+
+    BÅDA behåller regeln att ett fullbrett foto markerar gränsen hero
+    -> Tjänster starkare än en linje: (c) via kolumnens underkant, (d)
+    via bildens. Och båda ärver (b):s innehållskrav oförändrat — fotot
+    måste föreställa den familj texten påstår finns, samtycke från alla
+    som syns.
+
     PLATSHÅLLAREN ÄR ETT MIST-BAND MED HÅRSTRECK, inte ett vitt fält.
     Vitt provades och förkastades: sidans rytm är mist · mist · vit ·
     mist · mist, ett enda avbrott mitt på sidan, och ett vitt band i heron
