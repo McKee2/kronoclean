@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { Font } from 'astro:assets';
 import Hero from '../components/sections/Hero.astro';
 import Tjanster from '../components/sections/Tjanster.astro';
 import SaGarDetTill from '../components/sections/SaGarDetTill.astro';
@@ -36,6 +37,23 @@ const structuredData = buildStructuredData(Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/*
+      TYPSNITTEN. Utan de här två raderna emitteras inga @font-face alls
+      — deklarationen i astro.config.mjs räcker inte, den beskriver bara
+      vad som SKA laddas. Verifierat i dist före rättelsen: noll
+      @font-face, noll preload, sidan renderad i Georgia och Segoe UI.
+
+      Står först i <head> för att preload-länkarna ska hinna först.
+
+      preload är filtrerad, inte true. true preloadar varje fil familjen
+      har; här preloadas bara de skärningar som faktiskt syns över
+      vikningen: serifens 400 (h1 och telefonnumret) och Karlas 400
+      (brödtext). Karla 600 används bara till taglinen och sidfotens
+      etiketter och hämtas i vanlig ordning.
+    */}
+    <Font cssVariable="--font-instrument-serif" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-karla" preload={[{ weight: 400 }]} />
 
     {/* Så länge någon uppgift är obekräftad får sidan inte indexeras.
         Beror inte på miljövariabler och överlever därför felkonfiguration.

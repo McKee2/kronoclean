@@ -290,9 +290,29 @@
      vitt. */
   --color-dekor-wash: #b4d5fb; /* ton 252.2° — var #ACD8F8 på 240.0° */
 
-  /* Typografi — serif i rubriker, humanistisk sans i brödtext */
-  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
-  --font-sans: "Karla", system-ui, -apple-system, sans-serif;
+  /**
+   * Typografi — serif i rubriker, humanistisk sans i brödtext.
+   *
+   * ROLLEN PEKAR PÅ FAMILJEN, OCH FAMILJEN KOMMER FRÅN ASTRO. Här stod
+   * tidigare familjenamnen bokstavligt: "Instrument Serif", Georgia, ...
+   * Det såg rätt ut men laddade ingenting — @font-face emitteras av
+   * <Font> i <head>, och den saknades. Sidan renderades i Georgia.
+   *
+   * Familjenamnet går INTE att skriva bokstavligt heller nu när
+   * laddningen är på plats: Astro döper @font-face-familjen till
+   * "Instrument Serif-<hash>" så att två konfigurationer av samma familj
+   * inte kan kollidera. Namnet finns alltså bara i variabeln.
+   *
+   * SVANSEN INUTI var() ÄR EN SPÄRR, INTE EN DUBBLETT. Astros variabel
+   * bär redan sina egna fallbacks (satta i astro.config.mjs). Listan
+   * nedan är vad som gäller om variabeln INTE finns — alltså om någon
+   * lägger till en sida och glömmer <Font> i dess <head>. Utan svansen
+   * blir font-family ogiltig vid beräkningen och webbläsaren väljer sitt
+   * eget standardsnitt; med den faller sidan tillbaka på exakt det den
+   * renderade i innan laddningen kopplades in.
+   */
+  --font-display: var(--font-instrument-serif, Georgia, "Times New Roman", serif);
+  --font-sans: var(--font-karla, system-ui, -apple-system, sans-serif);
 }
 
 /* ------------------------------------------------------------------ */
