@@ -61,25 +61,35 @@
  * poängen med arbetet — slate och sky-text var uträknade mot mist och
  * faller mot navy (1.9 respektive 1.4).
  *
- *                 mist #E1EEFE   vitt #FFFFFF   navy (används ej)
- *   rubrik           11.02          12.96          15.81
- *   brod              7.07           8.31           9.11
- *   accent            3.26           3.83           6.38
- *   accent-liten      7.01           8.24           6.38
- *   linje             1.297          1.324          1.551
- *   avdelare          2.013          2.007          —
- *   ikon              4.51           5.31           6.38
- *   fokus             7.01           8.24          15.81
+ * Varje yta har sina EGNA pigment. Kolumnerna är alltså inte samma färg
+ * mätt tre gånger — mist och vitt delar uppsättning, krom har en egen.
  *
- * Ytbytet, mätt som ΔE i OKLab (stor yta, hård kant):
+ *                 mist #E1EEFE  vitt #FFFFFF  krom #CEDBEB  navy (används ej)
+ *   rubrik           11.02         12.96          9.23           15.81
+ *   brod              7.07          8.31          7.01            9.11
+ *   accent            3.26          3.83          3.01            6.38
+ *   accent-liten      7.01          8.24          7.04            6.38
+ *   linje             1.297         1.324         1.304           1.551
+ *   avdelare          2.013         2.007         2.017            —
+ *   ikon              4.51          5.31          3.78            6.38
+ *   fokus             7.01          8.24          7.04           15.81
+ *
+ * Ytbytena, mätta som ΔE i OKLab (stor yta, hård kant):
  *   mist -> vitt   ΔE 0.0615   kvot 1.176
+ *   krom -> mist   ΔE 0.0577   kvot 1.194
  * Gamla misten gav ΔE 0.0371 mot vitt. Kandidat B gör steget 66 % större,
  * och 0.0615 ligger klart över de ~0.02 som krävs för att en stor yta ska
- * läsas som en annan yta.
+ * läsas som en annan yta. Kromsteget ligger 6 % under sektionssteget och
+ * alltså i samma storleksordning — inte i en egen, svagare klass.
  *
- * Sidan har numera TVÅ ytor. Rytmen är mist · mist · vit · mist · mist:
- * ett enda avbrott mitt på sidan. Två vita block bland fem sektioner
- * börjar alternera, och alternering är vad som läser som ränder.
+ * Sidan har numera TRE ytor, men SEKTIONERNA har fortfarande två.
+ * Rytmen i innehållet är oförändrad: mist · mist · vit · mist, ett enda
+ * avbrott mitt på sidan. Två vita block bland sektionerna hade börjat
+ * alternera, och alternering är vad som läser som ränder.
+ *
+ * Krom är inte en fjärde sektionsyta utan sidans RAM: sidhuvudet överst
+ * och sidfoten underst, samma ton i båda ändar. Se --palett-krom för
+ * varför den ligger under mist och inte mellan mist och vitt.
  *
  * ==================================================================
  * REGELN
@@ -142,6 +152,66 @@
   /* Ytorna själva. */
   --palett-mist: #e1eefe;
   --palett-vit: #ffffff;
+
+  /**
+   * ==================================================================
+   * KROM — SIDHUVUDETS OCH SIDFOTENS YTA, OCH VARFÖR DEN LIGGER HÄR
+   * ==================================================================
+   * Beställningen var enkel: navbar och sidfot i egen ton, sektioner som
+   * växlar. Den svåra delen var VAR den egna tonen får ligga, och svaret
+   * är att den måste ligga UNDER mist. Här är räkningen.
+   *
+   * VITT ÄR TAKET OCH MIST ÄR GOLVET. Taket är trivialt. Golvet är inte
+   * valt utan uträknat: efter kontrasthöjningen till 7.0 kräver
+   * accent-liten (#034F94) en yta med luminans minst 0.8425. Mist ligger
+   * på 0.8431. Marginalen är 0.0006 — sex tiotusendelar. Mist är alltså
+   * praktiskt taget exakt den mörkaste ljusa yta rollerna tillåter.
+   *
+   * Räknat baklänges ur varje roll, ljusaste tillåtna yta i mistens ton:
+   *
+   *   brod          kräver Y >= 0.8343   ->  #E0EDFC
+   *   accent-liten  kräver Y >= 0.8425   ->  #E1EEFD   <- bindande
+   *   accent        kräver Y >= 0.7722   ->  #D8E5F5
+   *   ikon          kräver Y >= 0.5437   ->  #B7C4D3
+   *
+   * HELA BANDET MELLAN GOLV OCH TAK ÄR ΔE 0.0615. Det är plats för TVÅ
+   * ytor med ett synligt steg emellan, inte för tre. Ett förslag med
+   * navbar, två sektionstoner och sidfot inuti det bandet ger därför
+   * med nödvändighet steg på ~0.03 — halva det nuvarande — och två av
+   * dem hamnar under de ~0.02 som krävs för att en yta ska läsas som en
+   * annan yta alls. Det är aritmetik, inte smak.
+   *
+   * SLUTSATSEN: en tredje yta måste gå UNDER golvet, och då kan den inte
+   * låna text från mist. Lånade tokens ger på krom:
+   *
+   *   pa-mist-brod          5.92   (mål 7.0)
+   *   pa-mist-accent-liten  5.87   (mål 7.0)
+   *   pa-mist-accent        2.73   (mål 3.0)
+   *   pa-mist-avdelare      1.69   (mål 2.013)
+   *   pa-mist-linje         1.09   (mål 1.297)
+   *
+   * Alla fem faller. Kromytan har därför en EGEN uppsättning nedan, och
+   * det är precis vad regeln längst upp föreskriver: finns ingen passande
+   * roll är svaret att räkna fram en, inte att låna en från en annan yta.
+   *
+   * TONEN ÄR MISTENS, PÅ DECIMALEN. 253.6° i båda, härledd ur
+   * --palett-mist och inte ur något mellanled — samma regel som
+   * tonrättelsen av --palett-linje-vit en gång fick sättas efter.
+   * Kroma är oförändrad; bara ljusheten sjunker, från L 0.9442 till
+   * 0.8865.
+   */
+  --palett-krom: #cedbeb; /* ΔE 0.0577 mot mist · kvot 1.194 · ton 253.6° */
+
+  /**
+   * Kromytans egna pigment. Samma mål som på de ljusa ytorna — 7.0 för
+   * liten text, 3.0 för stor och för ikoner — men uträknade mot krom.
+   * Tonen är ärvd ur den token var och en ersätter, så familjen håller.
+   */
+  --palett-krom-brod: #3c4357; /* krom 7.01 — slates motsvarighet */
+  --palett-krom-accent-liten: #004286; /* krom 7.04 — sky-texts */
+  --palett-krom-accent: #007be6; /* krom 3.01 — skys */
+  --palett-krom-linje: #a7c2e3; /* krom 1.304 — gruppering inuti */
+  --palett-krom-avdelare: #819cbc; /* krom 2.017 — gräns mellan */
 
   /**
    * Avdelare, en per yta. Samma optiska tyngd på alla tre: en linje som
@@ -228,6 +298,27 @@
      1.53 på vitt och läser då som en ram, inte som en avdelare. */
   --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.324 — inuti sektion */
   --color-pa-vitt-avdelare: var(--palett-avdelare-vit); /* 2.007 — mellan sektioner */
+
+  /* ---------------------------------------------------------------- */
+  /* YTA KROM — sidhuvudet och sidfoten. Sidans ram, inte en sektion.  */
+  /* ---------------------------------------------------------------- */
+  /* Ingenting här pekar på mist- eller vitt-tokens, och det är inte en
+     förbiseelse. Krom ligger UNDER båda i ljushet (L 0.8865 mot 0.9442),
+     så varje lånad token faller: brod 5.92, accent-liten 5.87, accent
+     2.73, avdelare 1.69, linje 1.09. Se --palett-krom för räkningen som
+     visar varför ytan måste ligga där den ligger. */
+  --color-pa-krom-rubrik: var(--palett-navy); /* 9.23 */
+  --color-pa-krom-brod: var(--palett-krom-brod); /* 7.01 */
+  --color-pa-krom-accent: var(--palett-krom-accent); /* 3.01 */
+  --color-pa-krom-accent-liten: var(--palett-krom-accent-liten); /* 7.04 */
+  --color-pa-krom-linje: var(--palett-krom-linje); /* 1.304 — inuti */
+  --color-pa-krom-avdelare: var(--palett-krom-avdelare); /* 2.017 — mellan */
+  /* Ikonen är den enda som ÖVERLEVER lånet: sky-ikon ger 3.78 mot krom,
+     alltså över 3.0. Den delas därför med de ljusa ytorna, av samma skäl
+     som vitt delar med mist — en sanningskälla hellre än ett upprepat
+     hexvärde. */
+  --color-pa-krom-ikon: var(--palett-sky-ikon); /* 3.78 */
+  --color-pa-krom-fokus: var(--palett-krom-accent-liten); /* 7.04 */
 
   /* ---------------------------------------------------------------- */
   /* YTA NAVY — ANVÄNDS INTE I DAG.                                    */
@@ -356,6 +447,16 @@
   --fokusring: var(--color-pa-vitt-fokus);
 }
 
+/**
+ * Kromytan. Sidhuvud och sidfot, alltså sidans båda ändar. Att de delar
+ * ton är hela poängen: ramen ska läsa som EN sak som innehållet ligger
+ * inuti, inte som två olika fält som råkar vara mörkare.
+ */
+.yta-krom {
+  background: var(--palett-krom);
+  --fokusring: var(--color-pa-krom-fokus);
+}
+
 .yta-navy {
   background: var(--palett-navy-deep);
   --fokusring: var(--color-pa-navy-fokus);
@@ -396,14 +497,17 @@ html {
 }
 
 /**
- * Sidbakgrunden är mist. Sektionerna målar sin egen yta ovanpå, men det
- * som ligger utanför dem — överskrollen högst upp och under sista
- * sektionen — behöver också en färg.
+ * Sidbakgrunden är KROM, inte mist. Det som ligger utanför sektionerna är
+ * överskrollen högst upp och under sista sektionen — och i båda ändarna
+ * är det numera ramen som gränsar dit, inte innehållet. Med mist här
+ * hade en gummibandsrullning på iOS blottat en ljusare remsa ovanför
+ * sidhuvudet och under sidfoten, alltså exakt den kant ramen finns för
+ * att inte ha.
  */
 body {
   font-family: var(--font-sans);
   color: var(--palett-ink);
-  background: var(--palett-mist);
+  background: var(--palett-krom);
   -webkit-font-smoothing: antialiased;
 }
 

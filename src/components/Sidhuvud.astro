@@ -57,55 +57,68 @@ const telefon = telefonVy();
   och baren tar 60. Första skärmen vinner på flytten.
 
   ------------------------------------------------------------------
-  BAKGRUNDEN ÄR MIST, INTE VIT OCH INTE GENOMSKINLIG
+  BAKGRUNDEN ÄR KROM. DEN VAR MIST, OCH SKÄLET HAR VÄNT.
   ------------------------------------------------------------------
-  Sidan har två ytor och baren rullar över båda. Tre kandidater:
+  Baren rullar över sidans ytor och behöver en egen. Tre kandidater
+  prövades när den låg på mist, och en fjärde finns nu:
 
     genomskinlig   Ett halvgenomskinligt lager över mist och över vitt
     + blur         ger en tredje ton som inte är någon av dem, och som
                    ÄNDRAS med vad som råkar ligga under. Hela
                    färgsystemet bygger på uträknade kvoter mot en känd
                    yta; en yta som beror på rullningspositionen har inga
-                   kvoter att räkna. Samma invändning som mot skrimmet i
-                   hero-skiss (a), i mindre skala.
+                   kvoter att räkna. Fortfarande avvisad.
 
     vit            Baren blir ett synligt fält direkt vid sidladdning,
-                   ovanpå heron som är mist. Sidan öppnar då med ett
-                   ytbyte som inte betyder något.
+                   ovanpå heron som är mist. Avvisad då för att ytbytet
+                   inte betydde något. Se nedan — invändningen gällde
+                   BETYDELSEN, inte bytet.
 
-    mist  <-vald   Mist är grundytan: body, hero, Tjänster, Kontakt och
-                   sidfoten. Vid rullning 0 är baren alltså SAMMA yta
-                   som heron under den, och läser inte som ett pålagt
-                   fält utan som sidans överkant. Först när den passerar
-                   det enda vita blocket ("Så går det till") blir den ett
-                   eget fält — och det är precis då man vill se att den
-                   svävar.
+    mist           Var vald. Vid rullning 0 är baren samma yta som heron
+                   under den och läser som sidans överkant snarare än
+                   som ett pålagt fält.
 
-  Ingen ny token behövs: pa-mist-* gäller rakt av, samma tal som heron
-  räknar med.
+    krom <-vald    #CEDBEB, ΔE 0.0577 under mist. Baren är nu ett eget
+                   fält redan vid rullning 0 — precis det som avvisades
+                   för "vit". Skillnaden är att bytet numera BETYDER
+                   något: samma ton ligger i sidfoten, så de två läser
+                   som en ram runt innehållet och inte som ett löst fält
+                   överst. Ett ensamt vitt fält hade inte haft den
+                   parhästen.
+
+  Ny token krävdes. pa-mist-* går INTE att låna hit: brod ger 5.92 mot
+  målet 7.0, accent-liten 5.87, avdelare 1.69 mot 2.013. Se
+  --palett-krom i global.css för varför ytan måste ligga under mist och
+  inte mellan mist och vitt.
 
   ------------------------------------------------------------------
-  LINJEN I UNDERKANT ÄR PERMANENT
+  LINJEN I UNDERKANT: BEHÅLLEN, MEN BÅDA SKÄLEN HAR FALLIT
   ------------------------------------------------------------------
-  Den behövs av två skäl, och det andra är det som avgör nivån.
+  Den motiverades av två skäl. Efter ytbytet håller inget av dem.
 
-  1. Utan linje skärs texten som rullar under baren av vid en osynlig
-     kant — mist mot mist, ingen förklaring till var bokstäverna tar
-     slut. Det är den enda synliga artefakten en klistrad bar har.
+  1. "Utan linje skärs texten som rullar under baren av vid en osynlig
+     kant — mist mot mist." Kanten är inte längre osynlig: krom mot mist
+     är ett ytbyte på ΔE 0.0577, så texten skärs vid en synlig kant.
 
-  2. Regeln i index.astro säger: EN LINJE MARKERAR EN GRÄNS SOM YTBYTET
-     INTE GÖR. Sidhuvud -> hero är mist -> mist. Gränsen finns (huvud
-     mot innehåll) och ytbytet gör den inte. Regeln argumenterar alltså
-     FÖR linjen, inte emot — samma fall som Kontakt -> sidfot.
+  2. "Regeln säger att en linje markerar en gräns som ytbytet inte gör.
+     Sidhuvud -> hero är mist -> mist." Det stämmer inte längre. Gränsen
+     är krom -> mist, och ytbytet gör den.
 
-  Nivån är avdelare (2.013), inte linje (1.297): det här är en gräns
+  Linjen står kvar ändå, av samma skäl som sidfotens: passet som
+  beställdes var färgbytet, inte en omprövning av var sidan har sina
+  gränser. Att ta bort den är EN rad. Behålls den är fogen
+  dubbelmarkerad — ytbyte plus linje — vilket är just vad hero-bandet
+  mot Tjänster undviker.
+
+  Färgen är omräknad oavsett: pa-mist-avdelare ger 1.69 mot krom och
+  hade alltså tunnats ut till nästan ingenting. Nivån är
+  pa-krom-avdelare (2.017), inte linje (1.304): det här är en gräns
   MELLAN sidans delar, inte en gruppering inuti en. Tjockleken är 1 px.
   2 px är sidfotens enda regel och ska förbli det — den betyder slutet.
 
   Att växla in linjen först vid rullning provades i tanken och
   förkastades: det kräver sidans första JavaScript (en
-  IntersectionObserver mot en sentinel) för att ta bort en linje som
-  regeln ovan ändå säger ska finnas. Sidan skickar noll skript i dag.
+  IntersectionObserver mot en sentinel). Sidan skickar noll skript i dag.
 
   ------------------------------------------------------------------
   MÅTTEN
@@ -152,7 +165,7 @@ const telefon = telefonVy();
   Sidhuvudet gör det inte: det ska stå still redan innan sidan börjar,
   som en ram runt innehållet snarare än som en del av det.
 */}
-<header class="sidhuvud yta-mist">
+<header class="sidhuvud yta-krom">
   <div
     class="sidhuvud__rad mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 lg:px-8"
   >
@@ -207,12 +220,12 @@ const telefon = telefonVy();
           <a
             href={telefon.href}
             aria-label={`Ring ${telefon.text}`}
-            class="sidhuvud__telefon font-sans text-base font-semibold text-pa-mist-accent-liten"
+            class="sidhuvud__telefon font-sans text-base font-semibold text-pa-krom-accent-liten"
           >
             {telefon.text}
           </a>
         ) : (
-          <span class="font-sans text-base font-semibold text-pa-mist-brod">
+          <span class="font-sans text-base font-semibold text-pa-krom-brod">
             {telefon.text}
           </span>
         ))
@@ -227,7 +240,7 @@ const telefon = telefonVy();
     /* Över allt sidinnehåll. Sidan har inga andra staplade lager, så
        50 är gott om marginal och inte ett tal som måste förhandlas. */
     z-index: 50;
-    border-bottom: 1px solid var(--color-pa-mist-avdelare);
+    border-bottom: 1px solid var(--color-pa-krom-avdelare);
   }
 
   /* Höjden sitter på raden och inte på <header>, så att linjen i
@@ -251,6 +264,6 @@ const telefon = telefonVy();
   }
 
   .sidhuvud__telefon:hover {
-    color: var(--color-pa-mist-rubrik);
+    color: var(--color-pa-krom-rubrik);
   }
 </style>

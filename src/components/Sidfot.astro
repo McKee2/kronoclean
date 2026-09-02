@@ -14,25 +14,49 @@ const mejl = emailAdress();
 ---
 
 {/*
-  SIDFOTEN — på mist, som resten av sidan utom ett block.
+  SIDFOTEN — på KROM, tillsammans med sidhuvudet.
 
-  Den mörka ytan är borta. Att krympa den från 660 till 348 px räckte
-  inte: tre nyanser prövades och avvisades, och slutsatsen var att det är
-  MÖRKRET som är problemet, inte nyansen. Fem rader sidfotstext i ett
-  fält som tar en tredjedel av mobilskärmen går inte ihop oavsett vilken
-  blå man väljer. pa-mist-* står kvar i global.css men används ingenstans
-  — det står utskrivet där så ingen letar efter en mörk sektion.
+  Den var på mist, som resten av sidan utom ett block. Nu bär den och
+  sidhuvudet samma egna ton, och de två utgör tillsammans sidans ram.
+  Att de delar ton är hela poängen: innehållet ligger INUTI något, i
+  stället för att bara ta slut.
 
-  AVSLUTET BÄRS NU AV EN LINJE. Regeln: en linje markerar en gräns som
-  ytbytet inte gör. Av sidans fyra sektionsgränser markeras två av
-  ytbytet (mist->vit och vit->mist), och heron avslutas redan av
-  förtroendemarkörernas egen linje. Kvar blir denna. En linje på hela
-  sidan, inte en per sektion — fler läser som ett formulär.
+  Den mörka ytan är fortfarande borta, och det är en annan fråga än
+  denna. Att krympa den från 660 till 348 px räckte inte: tre nyanser
+  prövades och avvisades, och slutsatsen var att det är MÖRKRET som är
+  problemet, inte nyansen. Fem rader sidfotstext i ett fält som tar en
+  tredjedel av mobilskärmen går inte ihop oavsett vilken blå man väljer.
+  Krom är ingen återgång dit — den ligger på L 0.8865, alltså i den
+  ljusa familjen, 0.0577 från mist och inte 0.6 från den.
+
+  pa-navy-* står kvar i global.css men används ingenstans — det står
+  utskrivet där så ingen letar efter en mörk sektion.
+
+  ------------------------------------------------------------------
+  LINJEN: BEHÅLLEN, MEN DESS SKÄL HAR FALLIT
+  ------------------------------------------------------------------
+  Regeln lyder: en linje markerar en gräns som ytbytet inte gör. När
+  linjen skrevs var Kontakt -> sidfot mist -> mist, alltså inget ytbyte,
+  och regeln argumenterade FÖR den.
+
+  Nu är gränsen mist -> krom, ΔE 0.0577, och ytbytet gör jobbet. Regeln
+  argumenterar alltså inte längre för linjen. Den står kvar ändå,
+  eftersom passet som beställdes var färgbytet och inte en omprövning av
+  sidans avslut — och eftersom 2 px-linjen aldrig bara var en gräns utan
+  också SLUTET, sidans enda regel av sitt slag.
+
+  Att ta bort den är en rad. Görs det bär ytbytet gränsen ensamt, vilket
+  är exakt vad hero-bandet gör mot Tjänster. Behålls den är sidan
+  dubbelmarkerad i just den fogen. Det valet är kundens.
+
+  Färgen ÄR omräknad oavsett: pa-mist-avdelare ger 1.69 mot krom mot
+  målet 2.013, så linjen hade tunnats ut till nästan ingenting om den
+  fått ligga kvar på sin gamla token. Den är nu pa-krom-avdelare, 2.017.
 
   Den skiljer sig från en vanlig sektionsavdelare genom TJOCKLEK, inte
-  genom mörker: 2 px mot 1 px, samma färg. En mörkare tunn linje läser
-  som en starkare gräns av samma sort; en tjockare läser som en annan
-  sorts sak — slutet. Detta är sidans enda 2 px-regel.
+  genom mörker: 2 px mot 1 px, samma optiska tyngd. En mörkare tunn linje
+  läser som en starkare gräns av samma sort; en tjockare läser som en
+  annan sorts sak — slutet. Detta är sidans enda 2 px-regel.
 
   Linjen ligger INOM containern, inte i full bredd. Sidans innehåll har
   ett mått, och en full-bleed-linje skapar en kant som inte hör ihop med
@@ -51,13 +75,13 @@ const mejl = emailAdress();
   är det sista stället där en platshållare får stå, eftersom det är där
   besökaren letar efter beviset att företaget finns på riktigt.
 */}
-<footer class="yta-mist pb-20 lg:pb-28">
+<footer class="yta-krom pb-20 lg:pb-28">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
-    <div class="border-t-2 border-pa-mist-avdelare pt-20 lg:pt-28">
+    <div class="border-t-2 border-pa-krom-avdelare pt-20 lg:pt-28">
       <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <p class="font-display text-2xl text-pa-mist-rubrik">{COMPANY.name}</p>
-          <p class="mt-2 font-sans text-sm text-pa-mist-brod">
+          <p class="font-display text-2xl text-pa-krom-rubrik">{COMPANY.name}</p>
+          <p class="mt-2 font-sans text-sm text-pa-krom-brod">
             {COMPANY.tagline}
           </p>
 
@@ -65,7 +89,7 @@ const mejl = emailAdress();
             uppgifter.length > 0 && (
               <ul class="mt-4 space-y-1">
                 {uppgifter.map((rad) => (
-                  <li class="font-sans text-sm text-pa-mist-brod">{rad}</li>
+                  <li class="font-sans text-sm text-pa-krom-brod">{rad}</li>
                 ))}
               </ul>
             )
@@ -73,18 +97,18 @@ const mejl = emailAdress();
         </div>
 
         <div>
-          <h2 class="font-sans text-sm font-semibold text-pa-mist-rubrik">
+          <h2 class="font-sans text-sm font-semibold text-pa-krom-rubrik">
             Kontakt
           </h2>
           <ul class="mt-3 space-y-2">
             {
               telefon.lage !== 'dolt' && (
-                <li class="font-sans text-sm text-pa-mist-brod">
+                <li class="font-sans text-sm text-pa-krom-brod">
                   {telefon.lage === 'bekraftat' ? (
                     <a
                       href={telefon.href}
                       aria-label={`Ring ${telefon.text}`}
-                      class="sidfot-lank text-pa-mist-accent-liten"
+                      class="sidfot-lank text-pa-krom-accent-liten"
                     >
                       {telefon.text}
                     </a>
@@ -99,7 +123,7 @@ const mejl = emailAdress();
                 <li class="font-sans text-sm">
                   <a
                     href={`mailto:${mejl}`}
-                    class="sidfot-lank text-pa-mist-accent-liten"
+                    class="sidfot-lank text-pa-krom-accent-liten"
                   >
                     {mejl}
                   </a>
@@ -121,7 +145,7 @@ const mejl = emailAdress();
           {
             COMPANY.privacyPolicyConfirmed && (
               <p class="mt-4 font-sans text-sm">
-                <a href="/integritetspolicy" class="sidfot-lank text-pa-mist-accent-liten">
+                <a href="/integritetspolicy" class="sidfot-lank text-pa-krom-accent-liten">
                   Integritetspolicy
                 </a>
               </p>
@@ -132,12 +156,12 @@ const mejl = emailAdress();
         {
           orter.length > 0 && (
             <div>
-              <h2 class="font-sans text-sm font-semibold text-pa-mist-rubrik">
+              <h2 class="font-sans text-sm font-semibold text-pa-krom-rubrik">
                 Vi kör till
               </h2>
               <ul class="mt-3 space-y-1">
                 {orter.map((ort) => (
-                  <li class="font-sans text-sm text-pa-mist-brod">{ort}</li>
+                  <li class="font-sans text-sm text-pa-krom-brod">{ort}</li>
                 ))}
               </ul>
             </div>
@@ -161,6 +185,6 @@ const mejl = emailAdress();
   }
 
   .sidfot-lank:hover {
-    color: var(--color-pa-mist-rubrik);
+    color: var(--color-pa-krom-rubrik);
   }
 </style>
