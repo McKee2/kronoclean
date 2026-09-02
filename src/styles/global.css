@@ -1,17 +1,6 @@
 @import "tailwindcss";
 
 /**
- * Skisserna är inte sidan, och deras klasser får inte hamna i sidans
- * stilmall. Tailwind läser KÄLLFILER, inte genererade sidor, så
- * skissruttens noll byggda sidor räckte inte: sex regler för den mörka
- * ytan följde med in i dist. De två raderna nedan är hela spärren.
- * Skisserna har en egen stilmall, src/styles/skisser.css, som bara läser
- * de här två katalogerna.
- */
-@source not "../skisser";
-@source not "../pages/skisser";
-
-/**
  * Kronoclean designtokens.
  *
  * ==================================================================
