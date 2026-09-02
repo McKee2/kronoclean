@@ -49,12 +49,13 @@ const structuredData = buildStructuredData(Astro.site);
 
       preload är filtrerad, inte true. true preloadar varje fil familjen
       har; här preloadas bara de skärningar som faktiskt syns över
-      vikningen: serifens 400 (h1 och telefonnumret) och Karlas 400
-      (brödtext). Karla 600 används bara till taglinen och sidfotens
-      etiketter och hämtas i vanlig ordning.
+      vikningen: serifens 400 (h1 och telefonnumret) och sansens 400
+      (brödtext). Sansens 600 används bara till taglinen, sidfotens
+      etiketter, stegsiffrorna och numret i sidhuvudet, och hämtas i
+      vanlig ordning.
     */}
     <Font cssVariable="--font-instrument-serif" preload={[{ weight: 400 }]} />
-    <Font cssVariable="--font-karla" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-fira-sans" preload={[{ weight: 400 }]} />
 
     {/* Så länge någon uppgift är obekräftad får sidan inte indexeras.
         Beror inte på miljövariabler och överlever därför felkonfiguration.
@@ -153,9 +154,12 @@ const structuredData = buildStructuredData(Astro.site);
       <Kontakt />
     </main>
     {/* <footer> hör inte hemma i <main> — den är sidmetadata, inte
-        sidans innehåll. Ytan är densamma som Kontakts, så det mörka
-        blocket löper obrutet till sidans slut trots att gränsen för
-        <main> går emellan. */}
+        sidans innehåll. Ytan är densamma som Kontakts (mist, som allt
+        utom ett block), så ytan löper obrutet till sidans slut trots
+        att gränsen för <main> går emellan; gränsen bärs i stället av
+        2 px-linjen inuti Sidfot.astro. Meningen talade tidigare om
+        "det mörka blocket" — det försvann 2026-09-02 och kommentaren
+        blev kvar. */}
     <Sidfot />
   </body>
 </html>
