@@ -414,25 +414,34 @@ const svarstid = responsePromise();
   Den ÖVRE gränsen (27,5 %) kommer ur beskärningen vid 1920: syns bara
   45 % av höjden och den ligger centrerad, så fönstret är 27,5-72,5 %.
 
-  Den UNDRE kommer ur TEXTBANDET, uppmätt renderat och inte uppskattat:
+  Den UNDRE kommer ur TEXTBANDET, uppmätt på STAGINGBYGGET med
+  intoningarna neutraliserade:
 
     vy      blockhöjd   rubrikens topp   textbandet
-    320       400 px       59,2 %          40,8 %
-    390       400 px       59,2 %          40,8 %
-   1440       576 px       71,5 %          28,5 %
+    320       400 px       55,7 %          44,3 %
+    390       400 px       55,7 %          44,3 %
+   1440       576 px       69,0 %          31,0 %
 
-  Vid 320 syns hela höjden, så bandets 40,8 % gäller rakt av: inget
-  ansikte under 59,2 % av bildhöjden. Vid 1920 mappas bandets 28,5 %
-  tillbaka genom beskärningsfönstret till 59,7 % av källbilden. De två
-  hamnar alltså på samma ställe, och 55 % är den gränsen med marginal.
+  MÄT ALDRIG DET HÄR I DEV UTAN ATT SLÅ AV .reveal. Intoningen står
+  still när fliken inte målas och håller kvar sitt translateY(14px), så
+  varje block ligger 14 px för långt ned. Samma mätning i dev gav 59,2
+  och 71,5 % — precis 14 px fel, på ett tal som avgör om skrimmets
+  garanti gäller.
+
+  Vid 320 syns hela höjden, så bandets 44,3 % gäller rakt av: inget
+  ansikte under 55,7 % av bildhöjden. Vid 1920 mappas bandets 31,0 %
+  tillbaka genom beskärningsfönstret till 58,6 % av källbilden. De två
+  hamnar alltså på ungefär samma ställe, och 55 % är den gränsen med
+  marginal.
 
   Ett ansikte under den linjen hamnar under en halvgenomskinlig platta
   med rubriken ovanpå.
 
   RUBRIKENS TOPP LIGGER ÖVER 50 % I ALLA TRE VYER, och det är villkoret
   för att skrimmets uträknade tal ska gälla: gradienten är plan på 0.60
-  först från halva höjden. Mätt ovan: 59,2 / 59,2 / 71,5 %. Ändras
-  blockhöjderna eller rubrikens storlek måste den raden kontrolleras om.
+  först från halva höjden. Marginalen är 5,7 procentenheter vid 320,
+  alltså 23 px. Ändras blockhöjderna, rubrikens storlek eller
+  padding-bottom måste den raden kontrolleras om.
 
   Praktiskt för den som fotograferar:
     - ögonlinjen på 35-50 % av bildhöjden,
