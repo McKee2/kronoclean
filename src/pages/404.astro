@@ -65,13 +65,18 @@ const telefon = telefonVy();
             {/*
               Gemener, inte versaler. Startsidans H1 är en skylt över ett
               foto; det här är en undersidas rubrik och sätts som sajtens
-              övriga rubriker — Archivo 800 i gemener, samma storlek som
-              telefonnumret i heron. Ingen diakrit i strängen, så Å-
-              överhänget (0.9375 em mot ascent 0.878) är inte aktuellt.
+              övriga rubriker — Archivo 800 i gemener. Ingen diakrit i
+              strängen, så Å-överhänget (0.9375 em mot ascent 0.878) är
+              inte aktuellt.
+
+              34 PX VID 320, INTE 36. "Sidan finns inte" mäter 275 px i
+              36 px och 320-vyn har 272 — tre pixlar för mycket, och
+              rubriken bröt till "Sidan finns / inte". I 34 px mäter den
+              260 px och ryms med 12 px kvar. Från sm gäller 48 som förut.
             */}
             <h1
               id="fel-rubrik"
-              class="font-display text-4xl leading-[1.08] text-pa-mist-rubrik sm:text-5xl"
+              class="font-display text-[2.125rem] leading-[1.08] text-pa-mist-rubrik sm:text-5xl"
             >
               Sidan finns inte
             </h1>
