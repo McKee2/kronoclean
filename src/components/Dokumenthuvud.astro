@@ -1,0 +1,47 @@
+---
+import '../styles/global.css';
+import { Font } from 'astro:assets';
+import { SEO } from '../data/company';
+
+/**
+ * ==================================================================
+ * DOKUMENTHUVUDET — det i <head> som är LIKA för varje sida
+ * ==================================================================
+ * Fanns inte förrän 404-sidan kom till. Med en enda sida bodde allt i
+ * index.astro; med två sidor hade samma tio rader stått på två ställen,
+ * och den dagen någon lägger till en preload eller byter favicon hade
+ * den andra sidan tyst blivit kvar på det gamla.
+ *
+ * Här ligger bara det som inte beror på VILKEN sida det är: teckenkod,
+ * viewport, typsnitten, ikonerna och temafärgen. Titel, canonical,
+ * Open Graph, JSON-LD och noindex-logiken är sidans egna och stannar i
+ * respektive .astro-fil.
+ *
+ * global.css importeras HÄR och inte i varje sida, av samma skäl: den
+ * bär hela ytsystemet och rubrikvikten, och en sida utan den renderar
+ * i fel snitt på fel färger utan att något fel uppstår.
+ *
+ * ORDNINGEN ÄR EN DEL AV FUNKTIONEN. Komponenten ska stå FÖRST i <head>
+ * så att preload-länkarna för typsnitten hinner före allt annat.
+ * <Font> är det enda som emitterar @font-face över huvud taget —
+ * deklarationen i astro.config.mjs beskriver bara vad som SKA laddas.
+ *
+ * preload är filtrerad, inte true. true preloadar varje fil familjen
+ * har; här preloadas bara de skärningar som syns över vikningen: 800
+ * (rubriker) och sansens 400 (brödtext). Sansens 600 hämtas i vanlig
+ * ordning.
+ */
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<Font cssVariable="--font-archivo" preload={[{ weight: 800 }]} />
+<Font cssVariable="--font-fira-sans" preload={[{ weight: 400 }]} />
+
+{/* TODO: byt ut båda — de är Astros standardmärke, inte Kronocleans */}
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+{/* apple-touch-icon länkas först när filen finns. En 404 i <head>
+    är samma sorts osanning som en platshållartelefon. */}
+<meta name="theme-color" content={SEO.themeColor} />

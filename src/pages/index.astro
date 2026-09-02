@@ -1,6 +1,5 @@
 ---
-import '../styles/global.css';
-import { Font } from 'astro:assets';
+import Dokumenthuvud from '../components/Dokumenthuvud.astro';
 import Hero from '../components/sections/Hero.astro';
 import Tjanster from '../components/sections/Tjanster.astro';
 import SaGarDetTill from '../components/sections/SaGarDetTill.astro';
@@ -36,26 +35,13 @@ const structuredData = buildStructuredData(Astro.site);
 <!doctype html>
 <html lang="sv">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     {/*
-      TYPSNITTEN. Utan de här två raderna emitteras inga @font-face alls
-      — deklarationen i astro.config.mjs räcker inte, den beskriver bara
-      vad som SKA laddas. Verifierat i dist före rättelsen: noll
-      @font-face, noll preload, sidan renderad i Georgia och Segoe UI.
-
-      Står först i <head> för att preload-länkarna ska hinna först.
-
-      preload är filtrerad, inte true. true preloadar varje fil familjen
-      har; här preloadas bara de skärningar som faktiskt syns över
-      vikningen: serifens 400 (h1 och telefonnumret) och sansens 400
-      (brödtext). Sansens 600 används bara till taglinen, sidfotens
-      etiketter, stegsiffrorna och numret i sidhuvudet, och hämtas i
-      vanlig ordning.
+      Allt som är LIKA för varje sida — teckenkod, viewport, typsnitten,
+      ikonerna och temafärgen — bor i Dokumenthuvud.astro, delat med
+      404-sidan. Står först så att typsnittens preload hinner före allt
+      annat. Det som följer nedan är den här sidans eget.
     */}
-    <Font cssVariable="--font-archivo" preload={[{ weight: 800 }]} />
-    <Font cssVariable="--font-fira-sans" preload={[{ weight: 400 }]} />
+    <Dokumenthuvud />
 
     {/* Så länge någon uppgift är obekräftad får sidan inte indexeras.
         Beror inte på miljövariabler och överlever därför felkonfiguration.
@@ -65,13 +51,6 @@ const structuredData = buildStructuredData(Astro.site);
     <title>{SEO.title}</title>
     <meta name="description" content={SEO.description} />
     <link rel="canonical" href={canonical} />
-
-    {/* TODO: byt ut båda — de är Astros standardmärke, inte Kronocleans */}
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    {/* apple-touch-icon länkas först när filen finns. En 404 i <head>
-        är samma sorts osanning som en platshållartelefon. */}
-    <meta name="theme-color" content={SEO.themeColor} />
 
     {/* De fyra obligatoriska enligt ogp.me: type, title, url, image */}
     <meta property="og:type" content="website" />

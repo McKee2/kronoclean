@@ -1,0 +1,136 @@
+---
+import Dokumenthuvud from '../components/Dokumenthuvud.astro';
+import Sidhuvud from '../components/Sidhuvud.astro';
+import Sidfot from '../components/Sidfot.astro';
+import { COMPANY, telefonVy, assertRedoForProduktion } from '../data/company';
+
+/**
+ * ==================================================================
+ * 404 — SAMMA SAJT, EN SIDA SOM INTE FINNS
+ * ==================================================================
+ * wrangler.jsonc har haft not_found_handling: "404-page" sedan start,
+ * men inställningen var verkningslös: Cloudflare serverar närmaste
+ * 404.html, och utan src/pages/404.astro byggs ingen. Astro skriver den
+ * här filen till dist/404.html — inte dist/404/index.html — just för att
+ * hosting-lager letar efter det namnet.
+ *
+ * Sidhuvud och sidfot är sajtens egna, i samma ordning som på
+ * startsidan. Den som landar här ska se att de fortfarande är hos
+ * Kronoclean och inte har hamnat på något annat.
+ *
+ * INGEN HUMOR. Ett städföretags 404 ska vara hjälpsam. Rubriken säger
+ * vad som hänt, stycket säger varför det kan ha hänt, länken säger
+ * vart man ska, och numret finns kvar för den som ändå vill ringa.
+ *
+ * SPÄRREN GÄLLER HÄR OCKSÅ. Sidan renderar telefonnumret, så den kan
+ * läcka en platshållare precis som startsidan. assertRedoForProduktion
+ * körs därför även här. Och noindex är OVILLKORLIGT, inte beroende av
+ * flaggorna: en felsida ska aldrig indexeras oavsett vad den innehåller.
+ * Cloudflare svarar 404 så sökmotorer släpper den ändå, men robots-
+ * taggen är det som gäller om filen någon gång serveras med fel status.
+ *
+ * Ingen canonical, ingen Open Graph, ingen JSON-LD. Sidan ska inte
+ * delas och den är inte en entitet i grafen.
+ */
+assertRedoForProduktion();
+
+const telefon = telefonVy();
+---
+
+<!doctype html>
+<html lang="sv">
+  <head>
+    <Dokumenthuvud />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Sidan finns inte — {COMPANY.name}</title>
+  </head>
+  <body>
+    <Sidhuvud />
+    <main>
+      {/*
+        Samma yta, samma container och samma inre bredd som heron, så
+        texten börjar på samma vänsterkant som startsidans. Luften i
+        överkant är sektionernas vanliga pt-20/pt-28 och inte herons
+        pt-12 — här ligger ingen bild som ska sitta flush mot baren.
+      */}
+      <section class="yta-mist pt-20 pb-24 lg:pt-28 lg:pb-32" aria-labelledby="fel-rubrik">
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <div class="max-w-3xl">
+            <p
+              class="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.22em] text-pa-mist-accent-liten"
+            >
+              Fel 404
+            </p>
+
+            {/*
+              Gemener, inte versaler. Startsidans H1 är en skylt över ett
+              foto; det här är en undersidas rubrik och sätts som sajtens
+              övriga rubriker — Archivo 800 i gemener, samma storlek som
+              telefonnumret i heron. Ingen diakrit i strängen, så Å-
+              överhänget (0.9375 em mot ascent 0.878) är inte aktuellt.
+            */}
+            <h1
+              id="fel-rubrik"
+              class="font-display text-4xl leading-[1.08] text-pa-mist-rubrik sm:text-5xl"
+            >
+              Sidan finns inte
+            </h1>
+
+            <p class="mt-6 max-w-lg text-lg leading-relaxed text-pa-mist-brod">
+              Adressen kan vara felstavad, eller så har sidan flyttat. Allt
+              vi erbjuder finns på startsidan.
+            </p>
+
+            {/*
+              Understruken från början, samma idiom som sidfotens länkar
+              och numret i sidhuvudet: en länk ska se ut som en länk utan
+              att man behöver hitta den med musen.
+            */}
+            <p class="mt-8">
+              <a
+                href="/"
+                class="font-sans text-base font-semibold text-pa-mist-accent-liten underline decoration-1 underline-offset-[3px] hover:text-pa-mist-rubrik"
+              >
+                Till startsidan
+              </a>
+            </p>
+
+            {/*
+              Telefonen, i samma tre lägen som heron och sidhuvudet.
+              telefon.href finns bara på 'bekraftat'-varianten, så en länk
+              i fel gren kompilerar inte. I platshållarläget renderas
+              numret som text utan länk, utan aria-label och utan hover —
+              faran var aldrig att en siffra syns utan att en fungerande
+              tel:-länk går till fel person.
+            */}
+            {
+              telefon.lage !== 'dolt' && (
+                <div class="mt-14 border-t border-pa-mist-linje pt-8">
+                  <p class="mb-2 font-sans text-sm text-pa-mist-brod">
+                    {telefon.lage === 'bekraftat'
+                      ? 'Vill du hellre ringa?'
+                      : 'Numret läggs in innan sidan går live'}
+                  </p>
+                  {telefon.lage === 'bekraftat' ? (
+                    <a
+                      href={telefon.href}
+                      aria-label={`Ring ${telefon.text}`}
+                      class="inline-block py-1 font-display text-3xl text-pa-mist-rubrik transition-colors hover:text-pa-mist-accent focus-visible:text-pa-mist-accent sm:text-4xl"
+                    >
+                      {telefon.text}
+                    </a>
+                  ) : (
+                    <p class="py-1 font-display text-3xl text-pa-mist-rubrik sm:text-4xl">
+                      {telefon.text}
+                    </p>
+                  )}
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </section>
+    </main>
+    <Sidfot />
+  </body>
+</html>
