@@ -115,14 +115,17 @@ const telefon = telefonVy();
   kvasten 73-100 %. Ordmärkets versalhöjd är alltså ~0,23 av bildens
   höjd — mot ~0,72 för en logotyp som bara är ett ordmärke.
 
-  Mätt renderat, simulerat DPR 1 (halva pixlar i en 2x-skärmdump):
+  Mätt renderat, simulerat DPR 1 (halva pixlar i en 2x-skärmdump).
+  Talen är BILDHÖJD I PIXLAR och inte klassnamn — skrivs de som
+  utilities plockar Tailwinds skanner upp dem ur den här kommentaren och
+  emitterar reglerna, se noten om död CSS i passets commit:
 
-    h-32  ordmärket är en suddighet
-    h-36  gränsfall, "Kronoclean" går att gissa men inte läsa
-    h-40  gränsfall åt andra hållet
-    h-44  läsbart          <- golvet, valt för mobil
-    h-48  bekvämt
-    h-52  bekvämt          <- valt för lg
+    32 px  ordmärket är en suddighet
+    36 px  gränsfall, "Kronoclean" går att gissa men inte läsa
+    40 px  gränsfall åt andra hållet
+    44 px  läsbart          <- golvet, valt för mobil (h-11)
+    48 px  bekvämt
+    52 px  bekvämt          <- valt för lg (lg:h-13)
 
   Baren blir därmed 44 + 2*8 = 60 px och 52 + 2*12 = 76 px. Höjden bor i
   --navhojd i global.css, eftersom html:s scroll-padding-top måste läsa
