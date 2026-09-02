@@ -56,7 +56,18 @@ const STEG = [
     >
       Så går det till
     </h2>
-    <p class="mt-2 max-w-xl font-sans text-sm text-pa-vitt-brod">
+    {/*
+      16 px, av samma skäl som stegtexterna nedan — men det här stycket
+      stod inte i beställningen, så skälet ska stå skrivet.
+
+      Meningen är prosa och inte en uppgift. Lämnad på 14 px hade den
+      blivit sektionens enda brödtext under 16, och den råkar dessutom stå
+      direkt ovanför fyra stycken som nu är 16: en ingress mindre än den
+      text den inleder läser som ett förbiseende. Gruppvillkoret i
+      Tjänster ("50 % RUT-avdrag på arbetskostnaden") ligger kvar på 14 —
+      det är en uppgift man skannar, inte en mening man läser.
+    */}
+    <p class="mt-2 max-w-xl font-sans text-base text-pa-vitt-brod">
       Har du aldrig anlitat städhjälp förut är det här allt som händer.
     </p>
 
@@ -87,7 +98,16 @@ const STEG = [
             <h3 class="mt-4 font-display text-xl text-pa-vitt-rubrik">
               {steg.rubrik}
             </h3>
-            <p class="mt-2 font-sans text-sm leading-relaxed text-pa-vitt-brod">
+            {/*
+              16 px, samma skäl som kortens blurbar: 14 är för litet för
+              text man läser i meningar, och de fyra stegtexterna är
+              sidans längsta löpande text efter hero-ingressen. De står
+              dessutom på samma vita yta som korten, så en kvarlämnad
+              14:a hade gjort ytan tvåspråkig. Skalan finns dokumenterad
+              i Tjanster.astro: 12 ögonbryn, 14 uppgifter, 16 brödtext,
+              18 hero-ingress.
+            */}
+            <p class="mt-2 font-sans text-base leading-relaxed text-pa-vitt-brod">
               {steg.text}
             </p>
           </li>
