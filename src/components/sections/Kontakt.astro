@@ -7,27 +7,21 @@ const mejl = emailAdress();
 ---
 
 {/*
-  KONTAKT — sista sektionen i block 3, på grundytan mist.
+  KONTAKT — på mist, som allt utom ett block.
 
-  Stod tidigare på yta-navy tillsammans med sidfoten. Den flyttades hit
-  av ett skäl som var mätt, inte tyckt: 660 px sammanhängande mörkt är
-  för mycket yta för att läsa som ett AVSLUT. Vid den storleken blir
-  blocket en egen plats, och då spelar det ingen roll att färgen är
-  släkt med loggan — den lästes som ett hopp till en annan sajt.
+  Sektionen låg först på en mörk yta tillsammans med sidfoten, sedan på
+  mist medan sidfoten var kvar i mörkt. Den mörka ytan är nu helt borta:
+  tre nyanser prövades och avvisades, och slutsatsen var att det är
+  MÖRKRET som är problemet, inte nyansen. Ett fält som tar en tredjedel
+  av mobilskärmen med fem rader text i går inte ihop oavsett blå.
 
-  Färgen var alltså inte problemet. --palett-navy-deep #00156D är ett
-  bokstavligt pixelvärde ur loggan, 1.5° från navy. Storleken var
-  problemet, och den halveras genom att flytta kontakt hit: kvar blir
-  348 px sidfot, litet nog att läsa som en sidfotsribba.
+  Ett mellansteg övervägdes på vägen och förkastades med mätning: mist
+  ligger 92 % av vägen mot vitt (vit -> mist är ΔE 0.0615, mist -> navy
+  var 0.6888), så att lägga mist emellan delade inte fallet — det
+  flyttade samma stup en sektion ned.
 
-  Ett mellansteg övervägdes och förkastades med mätning: mist ligger
-  92 % av vägen mot vitt (vit -> mist är ΔE 0.0615, mist -> navy är
-  0.6888), så att lägga mist emellan delar inte fallet — det flyttar
-  samma stup en sektion ned. Poängen med flytten är ytans STORLEK, inte
-  att steget skulle bli mjukare.
-
-  Sektionen hamnar dessutom rätt i blockplanen på köpet: block 3 är
-  mist och rymmer Områden och Vanliga frågor. Kontakt hör hemma där.
+  Gränsen mot sidfoten bärs nu av en 2 px-linje i Sidfot.astro, inte av
+  ett ytbyte. Regeln står i index.astro.
 
   Telefonen är PRIMÄR, inte en av flera vägar. Det syns i tre val:
   numret står i display-snittet i samma storlek som heron, mejlen står

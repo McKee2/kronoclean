@@ -36,9 +36,14 @@
  *   brod           brödtext, liten text       >= 5.0  (4.5 + 0.5)
  *   accent         stor text, emfas, ramar    >= 3.0
  *   accent-liten   accentfärgad LITEN text    >= 5.0
- *   linje          avdelare, ren dekor        mål ~1.30 ljus, ~1.55 mörk
+ *   linje          gruppering INUTI sektion   mål ~1.30
+ *   avdelare       gräns MELLAN sektioner     mål ~2.00
  *   ikon           ikonstreck                 >= 3.0
  *   fokus          fokusring                  >= 3.0
+ *
+ * brod och accent-liten siktar numera 7.0 mot mist, inte 5.0. Kraven är
+ * minimigränser; 7.0 är WCAG AAA för normal text och det är den nivå
+ * lång brödtext förtjänar. Se --palett-slate för hela resonemanget.
  *
  * accent-liten är den sjunde rollen och den enda som inte stod i
  * beställningen. Den måste finnas: accent är uträknad mot 3.0 och faller
@@ -56,22 +61,25 @@
  * poängen med arbetet — slate och sky-text var uträknade mot mist och
  * faller mot navy (1.9 respektive 1.4).
  *
- *                 mist #E1EEFE   vitt #FFFFFF   navy #00156D
+ *                 mist #E1EEFE   vitt #FFFFFF   navy (används ej)
  *   rubrik           11.02          12.96          15.81
- *   brod              5.53           6.50           9.11
+ *   brod              7.07           8.31           9.11
  *   accent            3.26           3.83           6.38
- *   accent-liten      5.24           6.16           6.38
- *   linje             1.297          1.323          1.551
- *   ikon              3.26           3.83           6.38
- *   fokus             5.24           5.97          15.81
+ *   accent-liten      7.01           8.24           6.38
+ *   linje             1.297          1.324          1.551
+ *   avdelare          2.013          2.007          —
+ *   ikon              4.51           5.31           6.38
+ *   fokus             7.01           8.24          15.81
  *
- * Ytbytena, mätta som ΔE i OKLab (stor yta, hård kant):
+ * Ytbytet, mätt som ΔE i OKLab (stor yta, hård kant):
  *   mist -> vitt   ΔE 0.0615   kvot 1.176
- *   mist -> navy   ΔE 0.6888   kvot 13.45
- *   vitt -> navy   ΔE 0.7484   kvot 15.81
  * Gamla misten gav ΔE 0.0371 mot vitt. Kandidat B gör steget 66 % större,
  * och 0.0615 ligger klart över de ~0.02 som krävs för att en stor yta ska
  * läsas som en annan yta.
+ *
+ * Sidan har numera TVÅ ytor. Rytmen är mist · mist · vit · mist · mist:
+ * ett enda avbrott mitt på sidan. Två vita block bland fem sektioner
+ * börjar alternera, och alternering är vad som läser som ränder.
  *
  * ==================================================================
  * REGELN
@@ -90,12 +98,46 @@
   --palett-navy-deep: #00156d;
   --palett-sky: #0083ee;
 
-  /* Härledda i OKLCh med bevarad ton. */
-  --palett-sky-text: #0462b4; /* sky mörkad för liten text på ljus yta */
+  /**
+   * Härledda i OKLCh med bevarad ton.
+   *
+   * KONTRASTHÖJNING 2026-09-02. slate och sky-text låg på 5.53 och 5.24
+   * mot mist. Talen klarade kravet 5.0 men lästes svagt, och kraven är
+   * minimigränser, inte mål. Nytt mål: 7.0 mot mist, alltså WCAG AAA för
+   * normal text — en namngiven nivå och inte "så mörkt som möjligt". 8.0
+   * börjar närma sig nästan-svart och tappar mjukheten i lång brödtext.
+   *
+   * MÄTT FÖRST, SEDAN ÄNDRAT. Innan omräkningen mättes varje renderat
+   * textelement: på VITT finns tio textelement och alla är 14 px, medan
+   * mist har hero-brödtexten på 18 px. Vitt läste svagast för att det är
+   * där nästan all liten text bor — kortens blurbar och stegtexterna.
+   * Det är alltså storlek OCH färg. Färgen är åtgärdad här; att 14 px är
+   * liten för brödtext står kvar som en öppen fråga för korten.
+   *
+   * EN FÄRG FÖR BÅDA LJUSA YTORNA, ställd mot mist som är den svårare.
+   * Att sikta 7.0 per yta hade gjort vitt LJUSARE än mist, eftersom vitt
+   * ger högre kvot för samma färg — precis den inversion som gjorde att
+   * vitt kändes tunnare. Samma pigment på båda: mist 7.07, vitt 8.31.
+   */
+  --palett-sky-text: #034f94; /* mist 7.01 · vitt 8.24 — var #0462B4 (5.24) */
   --palett-sky-lyft: #66a8f4; /* sky lyft för mörk yta — spegelbilden */
-  --palett-slate: #555e72; /* brödtext på ljus yta */
+  --palett-slate: #464e62; /* mist 7.07 · vitt 8.31 — var #555E72 (5.53) */
   --palett-frost: #b0c7e1; /* brödtext på mörk yta, slates motsvarighet */
   --palett-ink: #18243b;
+
+  /**
+   * Ikonstreck. Egen token, och det är ett medvetet avsteg från regeln i
+   * pass 4 om att loggans accent BEHÅLLS för ikoner.
+   *
+   * Skälet: med brödtext på 7.07 blir 1.5 px-streck på 3.26 sidans
+   * svagaste bläck. En ikon som är ljusare än all text omkring sig läser
+   * som en skiss, inte som en del av innehållet.
+   *
+   * Den ligger separat just för att avsteget ska gå att backa med EN rad:
+   * peka --color-pa-mist-ikon på --palett-sky igen så är loggans exakta
+   * pixel tillbaka. Tonen är bevarad, 252.7° -> 252.8°.
+   */
+  --palett-sky-ikon: #056cc5; /* mist 4.51 · vitt 5.31 — sky mörkad */
 
   /* Ytorna själva. */
   --palett-mist: #e1eefe;
@@ -134,6 +176,25 @@
   --palett-linje-mist: #b8d4f5; /* ton 252.7°, redan rätt förankrad */
   --palett-linje-vit: #cee2f8; /* ton 250.8° — var #CBE3F7 på 243.3° */
   --palett-linje-navy: #263f77; /* ton 264.1°, förankrad mot navy */
+
+  /**
+   * AVDELARE — en andra, starkare linjenivå. Skild från linje-* ovan, och
+   * skillnaden är hela poängen.
+   *
+   * linje-* grupperar INUTI en sektion: förtroendemarkörerna i heron,
+   * segmentdelningen i Tjänster, mejlblocket i Kontakt. Den ska vara
+   * tyst, och 1.30 är rätt för det.
+   *
+   * avdelare-* markerar en gräns MELLAN sektioner. Det är ett
+   * strukturellt jobb och kräver mer tyngd, 2.01.
+   *
+   * Att i stället höja linje-* provades i en mockup och förkastades: då
+   * följer varje grupperingslinje med upp och börjar konkurrera med
+   * sektionsgränsen, och sidan läser som ett formulär. Två nivåer, två
+   * jobb.
+   */
+  --palett-avdelare-mist: #90abcb; /* mot mist 2.013 */
+  --palett-avdelare-vit: #a6b9cf; /* mot vitt 2.007 */
 }
 
 @theme static {
@@ -141,12 +202,13 @@
   /* YTA MIST — grundytan. Hero, Tjänster, Områden, Vanliga frågor.    */
   /* ---------------------------------------------------------------- */
   --color-pa-mist-rubrik: var(--palett-navy); /* 11.02 */
-  --color-pa-mist-brod: var(--palett-slate); /* 5.53 */
-  --color-pa-mist-accent: var(--palett-sky); /* 3.26 */
-  --color-pa-mist-accent-liten: var(--palett-sky-text); /* 5.24 */
-  --color-pa-mist-linje: var(--palett-linje-mist); /* 1.297 */
-  --color-pa-mist-ikon: var(--palett-sky); /* 3.26 */
-  --color-pa-mist-fokus: var(--palett-sky-text); /* 5.24 */
+  --color-pa-mist-brod: var(--palett-slate); /* 7.07 */
+  --color-pa-mist-accent: var(--palett-sky); /* 3.26 — ramar, hover, stor text */
+  --color-pa-mist-accent-liten: var(--palett-sky-text); /* 7.01 */
+  --color-pa-mist-linje: var(--palett-linje-mist); /* 1.297 — inuti sektion */
+  --color-pa-mist-avdelare: var(--palett-avdelare-mist); /* 2.013 — mellan sektioner */
+  --color-pa-mist-ikon: var(--palett-sky-ikon); /* 4.51 — se --palett-sky-ikon */
+  --color-pa-mist-fokus: var(--palett-sky-text); /* 7.01 */
 
   /* ---------------------------------------------------------------- */
   /* YTA VITT — korten, och blocket Så går det till + Priser.          */
@@ -157,20 +219,39 @@
      hexvärdet ger en enda sanningskälla — ändras mist-tokenen följer
      vitt-tokenen med i stället för att tyst hamna på fel sida kravet. */
   --color-pa-vitt-rubrik: var(--color-pa-mist-rubrik); /* 12.96 */
-  --color-pa-vitt-brod: var(--color-pa-mist-brod); /* 6.50 */
+  --color-pa-vitt-brod: var(--color-pa-mist-brod); /* 8.31 */
   --color-pa-vitt-accent: var(--color-pa-mist-accent); /* 3.83 */
-  --color-pa-vitt-accent-liten: var(--color-pa-mist-accent-liten); /* 6.16 */
-  --color-pa-vitt-ikon: var(--color-pa-mist-ikon); /* 3.83 */
-  --color-pa-vitt-fokus: var(--color-pa-mist-fokus); /* 5.97 */
+  --color-pa-vitt-accent-liten: var(--color-pa-mist-accent-liten); /* 8.24 */
+  --color-pa-vitt-ikon: var(--color-pa-mist-ikon); /* 5.31 */
+  --color-pa-vitt-fokus: var(--color-pa-mist-fokus); /* 8.24 */
   /* Avdelaren är den enda som inte kan delas: --palett-linje-mist ger
      1.53 på vitt och läser då som en ram, inte som en avdelare. */
-  --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.324 */
+  --color-pa-vitt-linje: var(--palett-linje-vit); /* 1.324 — inuti sektion */
+  --color-pa-vitt-avdelare: var(--palett-avdelare-vit); /* 2.007 — mellan sektioner */
 
   /* ---------------------------------------------------------------- */
-  /* YTA NAVY — avslutningsblocket: Kontakt + Footer.                  */
+  /* YTA NAVY — ANVÄNDS INTE I DAG.                                    */
   /* ---------------------------------------------------------------- */
-  /* Inget här kan lånas från de ljusa ytorna. Hela uppsättningen är
-     framräknad separat, i skys och navys egna toner. */
+  /**
+   * INGEN SEKTION PÅ SIDAN STÅR PÅ NAVY. Leta inte efter en mörk
+   * sektion — det finns ingen. Sidan har två ytor: mist och vitt.
+   *
+   * Den mörka ytan avvecklades 2026-09-02. Tre nyanser prövades och
+   * avvisades — #00156D, #002881 och #0B3A78 — och slutsatsen var att
+   * det är MÖRKRET som är problemet, inte nyansen: fem rader sidfotstext
+   * i ett fält som tar en tredjedel av mobilskärmen går inte ihop
+   * oavsett vilken blå man väljer. Kontakt och sidfot står nu på mist.
+   *
+   * Tokens står kvar av två skäl. De är framräknade och verifierade
+   * renderat — rubrik 15.81, brod 9.11, accent 6.38, fokusringen mätt
+   * med riktig tangentbordsfokus — så arbetet finns kvar om en mörk yta
+   * någonsin behövs igen, till exempel bakom ett foto. Och @theme static
+   * emitterar dem ändå, så de kostar ingenting att låta ligga.
+   *
+   * Skulle de tas i bruk: inget här kan lånas från de ljusa ytorna.
+   * pa-mist-brod ger 1.9 mot navy och pa-mist-accent-liten 1.4. Hela
+   * uppsättningen är framräknad separat, i skys och navys egna toner.
+   */
   --color-pa-navy-rubrik: var(--palett-vit); /* 15.81 */
   --color-pa-navy-brod: var(--palett-frost); /* 9.11 */
   --color-pa-navy-accent: var(--palett-sky-lyft); /* 6.38 */

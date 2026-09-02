@@ -84,29 +84,37 @@ const structuredData = buildStructuredData(Astro.site);
   </head>
   <body>
     {/*
-      SEKTIONSRYTMEN. Fyra block, tre ytbyten, åtta sektioner när sidan
-      är färdig. Ytan byts när LÄSARENS UPPGIFT byts, inte varannan
-      sektion — ren växling ljus/mörk läser som ränder och betyder
-      ingenting.
+      SEKTIONSRYTMEN. Sidan har TVÅ ytor och en accent. Ingen mörk yta
+      finns — leta inte efter en.
 
-        yta-mist   Hero · Tjänster                        orienterar sig
-        yta-vit    Så går det till · Priser               kontrollerar affären
-        yta-mist   Områden · Vanliga frågor · Kontakt     slår upp, hör av sig
-        yta-navy   Footer                                 avslutar
+        yta-mist   Hero · Tjänster · Kontakt · Sidfot
+        yta-vit    Så går det till
 
-      Kontakt låg först i det mörka blocket. Den flyttades till block 3
-      när 660 px sammanhängande mörkt visade sig läsa som en annan sajt
-      snarare än som ett avslut. Den hamnade rätt på köpet: block 3 är
-      uppslagsmaterial, och att höra av sig hör dit — det är vad man gör
-      när man slagit upp det man behövde veta.
+      mist · mist · vit · mist · mist. Ett enda avbrott mitt på sidan.
+      Två vita block bland fem sektioner börjar alternera, och
+      alternering är vad som läser som ränder. Det vita blocket är
+      "Så går det till" — den tätaste och mest lästa sektionen, den som
+      tar bort osäkerhet — så det är rätt sektion att lyfta. En sidfot
+      är aldrig en emfas och hör hemma på grundytan.
 
-      Två sektioner i samma yta skiljs av LUFT, inte av en linje: varje
-      sektion har py-20/lg:py-28, alltså 160 px på mobil och 224 px på
-      desktop mellan innehållen, och var och en inleds med sin egen h2.
-      Linjen är reserverad för gruppering INUTI en sektion — så som
-      Tjänster skiljer privat från företag. Tre nivåer, tre medel, ingen
-      överlappning: ytbyte skiljer block, luft skiljer sektioner, linje
-      grupperar inuti en sektion.
+      SEPARATION, tre medel och en regel: EN LINJE MARKERAR EN GRÄNS
+      SOM YTBYTET INTE GÖR.
+
+        Hero -> Tjänster        mist->mist  förtroendemarkörernas egen
+                                            linje avslutar redan heron
+        Tjänster -> Så går...   mist->vit   ytbytet
+        Så går... -> Kontakt    vit->mist   ytbytet
+        Kontakt -> Sidfot       mist->mist  LINJEN, 2 px i Sidfot.astro
+
+      En linje på hela sidan, inte en per sektion. Fler läser som ett
+      formulär, och regeln håller antalet nere av sig själv när
+      sektioner tillkommer.
+
+      Linjenivåerna får inte blandas ihop: pa-*-linje (1.30) grupperar
+      INUTI en sektion, pa-*-avdelare (2.01) markerar en gräns MELLAN
+      sektioner. Att i stället höja linje-* provades och förkastades —
+      då följer varje grupperingslinje med upp och konkurrerar med
+      sektionsgränsen.
     */}
     <main>
       <Hero />

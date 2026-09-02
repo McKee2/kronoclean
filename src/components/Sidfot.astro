@@ -14,18 +14,34 @@ const mejl = emailAdress();
 ---
 
 {/*
-  SIDFOTEN — hela avslutningsblocket, och sidans enda mörka yta.
+  SIDFOTEN — på mist, som resten av sidan utom ett block.
 
-  Kontakt låg här tidigare. Den flyttades till mist därför att 660 px
-  sammanhängande mörkt läste som ett hopp till en annan sajt i stället
-  för som ett avslut — se kommentaren i Kontakt.astro. Kvar blir 348 px,
-  litet nog att läsa som en sidfotsribba. Färgen är oförändrad: den var
-  aldrig problemet.
+  Den mörka ytan är borta. Att krympa den från 660 till 348 px räckte
+  inte: tre nyanser prövades och avvisades, och slutsatsen var att det är
+  MÖRKRET som är problemet, inte nyansen. Fem rader sidfotstext i ett
+  fält som tar en tredjedel av mobilskärmen går inte ihop oavsett vilken
+  blå man väljer. pa-mist-* står kvar i global.css men används ingenstans
+  — det står utskrivet där så ingen letar efter en mörk sektion.
 
-  Skild från Kontakt av YTBYTET, inte av luft eller linje. Det är den
-  starkaste av de tre nivåerna i regeln som står i index.astro, och den
-  är rätt här: sidfoten är inte ännu en sektion i argumentet, den är
-  slutet.
+  AVSLUTET BÄRS NU AV EN LINJE. Regeln: en linje markerar en gräns som
+  ytbytet inte gör. Av sidans fyra sektionsgränser markeras två av
+  ytbytet (mist->vit och vit->mist), och heron avslutas redan av
+  förtroendemarkörernas egen linje. Kvar blir denna. En linje på hela
+  sidan, inte en per sektion — fler läser som ett formulär.
+
+  Den skiljer sig från en vanlig sektionsavdelare genom TJOCKLEK, inte
+  genom mörker: 2 px mot 1 px, samma färg. En mörkare tunn linje läser
+  som en starkare gräns av samma sort; en tjockare läser som en annan
+  sorts sak — slutet. Detta är sidans enda 2 px-regel.
+
+  Linjen ligger INOM containern, inte i full bredd. Sidans innehåll har
+  ett mått, och en full-bleed-linje skapar en kant som inte hör ihop med
+  innehållet. Heron ska dessutom få en full-bleed-bild, och de skulle
+  konkurrera.
+
+  Luften är centrerad kring linjen: Kontakts pb-20 ger 80 px ovanför,
+  containerns pt-20 lika mycket under. Därför sitter paddingen på
+  innercontainern och inte på <footer>.
 
   <footer> ligger utanför <main>, som är rätt landmärke för
   sidmetadata. Ytklassen sitter på elementet självt.
@@ -35,97 +51,99 @@ const mejl = emailAdress();
   är det sista stället där en platshållare får stå, eftersom det är där
   besökaren letar efter beviset att företaget finns på riktigt.
 */}
-<footer class="yta-navy pt-20 pb-20 lg:pt-28 lg:pb-28">
+<footer class="yta-mist pb-20 lg:pb-28">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
-    <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-      <div>
-        <p class="font-display text-2xl text-pa-navy-rubrik">{COMPANY.name}</p>
-        <p class="mt-2 font-sans text-sm text-pa-navy-brod">
-          {COMPANY.tagline}
-        </p>
+    <div class="border-t-2 border-pa-mist-avdelare pt-20 lg:pt-28">
+      <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <p class="font-display text-2xl text-pa-mist-rubrik">{COMPANY.name}</p>
+          <p class="mt-2 font-sans text-sm text-pa-mist-brod">
+            {COMPANY.tagline}
+          </p>
 
-        {
-          uppgifter.length > 0 && (
-            <ul class="mt-4 space-y-1">
-              {uppgifter.map((rad) => (
-                <li class="font-sans text-sm text-pa-navy-brod">{rad}</li>
-              ))}
-            </ul>
-          )
-        }
-      </div>
-
-      <div>
-        <h2 class="font-sans text-sm font-semibold text-pa-navy-rubrik">
-          Kontakt
-        </h2>
-        <ul class="mt-3 space-y-2">
           {
-            telefon.lage !== 'dolt' && (
-              <li class="font-sans text-sm text-pa-navy-brod">
-                {telefon.lage === 'bekraftat' ? (
+            uppgifter.length > 0 && (
+              <ul class="mt-4 space-y-1">
+                {uppgifter.map((rad) => (
+                  <li class="font-sans text-sm text-pa-mist-brod">{rad}</li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+
+        <div>
+          <h2 class="font-sans text-sm font-semibold text-pa-mist-rubrik">
+            Kontakt
+          </h2>
+          <ul class="mt-3 space-y-2">
+            {
+              telefon.lage !== 'dolt' && (
+                <li class="font-sans text-sm text-pa-mist-brod">
+                  {telefon.lage === 'bekraftat' ? (
+                    <a
+                      href={telefon.href}
+                      aria-label={`Ring ${telefon.text}`}
+                      class="sidfot-lank text-pa-mist-accent-liten"
+                    >
+                      {telefon.text}
+                    </a>
+                  ) : (
+                    telefon.text
+                  )}
+                </li>
+              )
+            }
+            {
+              mejl && (
+                <li class="font-sans text-sm">
                   <a
-                    href={telefon.href}
-                    aria-label={`Ring ${telefon.text}`}
-                    class="sidfot-lank text-pa-navy-accent-liten"
+                    href={`mailto:${mejl}`}
+                    class="sidfot-lank text-pa-mist-accent-liten"
                   >
-                    {telefon.text}
+                    {mejl}
                   </a>
-                ) : (
-                  telefon.text
-                )}
-              </li>
-            )
-          }
+                </li>
+              )
+            }
+          </ul>
+
+          {/*
+            Integritetspolicyn länkas FÖRST när sidan finns. En länk som
+            ger 404 är samma sorts osanning som en platshållartelefon, och
+            i sidfoten är den värre: där läser besökaren den som ett bevis
+            på att policyn existerar.
+
+            Ingen grå oklickbar text står här under tiden heller. "Vi har
+            en integritetspolicy, den går bara inte att läsa" är ett sämre
+            påstående än tystnad.
+          */}
           {
-            mejl && (
-              <li class="font-sans text-sm">
-                <a
-                  href={`mailto:${mejl}`}
-                  class="sidfot-lank text-pa-navy-accent-liten"
-                >
-                  {mejl}
+            COMPANY.privacyPolicyConfirmed && (
+              <p class="mt-4 font-sans text-sm">
+                <a href="/integritetspolicy" class="sidfot-lank text-pa-mist-accent-liten">
+                  Integritetspolicy
                 </a>
-              </li>
+              </p>
             )
           }
-        </ul>
+        </div>
 
-        {/*
-          Integritetspolicyn länkas FÖRST när sidan finns. En länk som
-          ger 404 är samma sorts osanning som en platshållartelefon, och
-          i sidfoten är den värre: där läser besökaren den som ett bevis
-          på att policyn existerar.
-
-          Ingen grå oklickbar text står här under tiden heller. "Vi har
-          en integritetspolicy, den går bara inte att läsa" är ett sämre
-          påstående än tystnad.
-        */}
         {
-          COMPANY.privacyPolicyConfirmed && (
-            <p class="mt-4 font-sans text-sm">
-              <a href="/integritetspolicy" class="sidfot-lank text-pa-navy-accent-liten">
-                Integritetspolicy
-              </a>
-            </p>
+          orter.length > 0 && (
+            <div>
+              <h2 class="font-sans text-sm font-semibold text-pa-mist-rubrik">
+                Vi kör till
+              </h2>
+              <ul class="mt-3 space-y-1">
+                {orter.map((ort) => (
+                  <li class="font-sans text-sm text-pa-mist-brod">{ort}</li>
+                ))}
+              </ul>
+            </div>
           )
         }
       </div>
-
-      {
-        orter.length > 0 && (
-          <div>
-            <h2 class="font-sans text-sm font-semibold text-pa-navy-rubrik">
-              Vi kör till
-            </h2>
-            <ul class="mt-3 space-y-1">
-              {orter.map((ort) => (
-                <li class="font-sans text-sm text-pa-navy-brod">{ort}</li>
-              ))}
-            </ul>
-          </div>
-        )
-      }
     </div>
   </div>
 </footer>
@@ -143,6 +161,6 @@ const mejl = emailAdress();
   }
 
   .sidfot-lank:hover {
-    color: var(--color-pa-navy-rubrik);
+    color: var(--color-pa-mist-rubrik);
   }
 </style>
