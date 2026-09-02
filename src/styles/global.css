@@ -280,7 +280,13 @@
   --color-dekor-wash: #b4d5fb; /* ton 252.2° — var #ACD8F8 på 240.0° */
 
   /**
-   * Typografi — serif i rubriker, humanistisk sans i brödtext.
+   * Typografi — kraftig grotesk i rubriker, humanistisk sans i brödtext.
+   *
+   * RUBRIKROLLEN ÄR ARCHIVO 800. Den var Instrument Serif 400. Skälet
+   * står utförligt i astro.config.mjs och kort här: ordmärket mättes till
+   * en fet, lutande grotesk med strokekontrast 1.53, och en rubrikserif
+   * med kontrast 3.20 bredvid den läser som förväxling snarare än som
+   * kontrast. Archivo ligger på 1.32 och är upprätt där märket lutar.
    *
    * ROLLEN PEKAR PÅ FAMILJEN, OCH FAMILJEN KOMMER FRÅN ASTRO. Här stod
    * tidigare familjenamnen bokstavligt: "Instrument Serif", Georgia, ...
@@ -289,19 +295,43 @@
    *
    * Familjenamnet går INTE att skriva bokstavligt heller nu när
    * laddningen är på plats: Astro döper @font-face-familjen till
-   * "Instrument Serif-<hash>" så att två konfigurationer av samma familj
-   * inte kan kollidera. Namnet finns alltså bara i variabeln.
+   * "Archivo-<hash>" så att två konfigurationer av samma familj inte kan
+   * kollidera. Namnet finns alltså bara i variabeln.
    *
    * SVANSEN INUTI var() ÄR EN SPÄRR, INTE EN DUBBLETT. Astros variabel
    * bär redan sina egna fallbacks (satta i astro.config.mjs). Listan
    * nedan är vad som gäller om variabeln INTE finns — alltså om någon
    * lägger till en sida och glömmer <Font> i dess <head>. Utan svansen
    * blir font-family ogiltig vid beräkningen och webbläsaren väljer sitt
-   * eget standardsnitt; med den faller sidan tillbaka på exakt det den
-   * renderade i innan laddningen kopplades in.
+   * eget standardsnitt; med den faller sidan tillbaka på en grotesk i
+   * stället för på webbläsarens serif.
+   *
+   * SVANSEN BYTTE SNITTKLASS I OCH MED ARCHIVO. Den stod på Georgia,
+   * "Times New Roman", serif — rätt medan rollen var en serif, och en
+   * tyst genreväxling efteråt.
    */
-  --font-display: var(--font-instrument-serif, Georgia, "Times New Roman", serif);
+  --font-display: var(--font-archivo, "Helvetica Neue", Arial, sans-serif);
   --font-sans: var(--font-fira-sans, system-ui, -apple-system, sans-serif);
+}
+
+/**
+ * RUBRIKVIKTEN BOR HÄR, INTE I MARKUP.
+ *
+ * Rollen är inte "Archivo" utan "Archivo 800", och skillnaden är
+ * mekanisk snarare än stilistisk: astro.config.mjs laddar EN enda vikt.
+ * Skrivs vikten som font-extrabold på de elva ställen som använder
+ * font-display är den elva gånger möjlig att glömma, och ett glömt
+ * ställe ärver då font-weight 400 — en vikt som inte finns. Webbläsaren
+ * rättar det tyst genom att rendera 800-filen ändå, så felet syns inte
+ * förrän någon laddar en andra vikt och sidan plötsligt blir spretig.
+ *
+ * Regeln ligger UTANFÖR @layer, alltså över Tailwinds utilities. Det är
+ * avsiktligt: font-bold eller font-normal på ett rubrikelement ska inte
+ * kunna välja en vikt som inte är hämtad. Behövs fler vikter är svaret
+ * att deklarera dem i astro.config.mjs först.
+ */
+.font-display {
+  font-weight: 800;
 }
 
 /* ------------------------------------------------------------------ */

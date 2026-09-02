@@ -227,17 +227,39 @@ const grupper = ORDNING.map((id) => ({
    *   radboxens mitt = 28 / 2                     = 14.000 px
    *
    * Skillnad 0.055 px. Sammanträffandet är inte slumpmässigt: de två
-   * sammanfaller exakt när versalhöjd = ascent - descent, och det gäller
-   * för Georgia (0.6975 mot 0.7031) och för Times New Roman (0.6725 mot
-   * 0.6719, skillnad 0.011 px). Konstruktionen håller alltså hela vägen
-   * ned genom fallbackkedjan.
+   * sammanfaller exakt när VERSALHÖJD = ASCENT - DESCENT. Det är hela
+   * konstruktionens antagande, och det är det enda som är
+   * snittberoende — marginalen mt-0.5 nedan beror bara på radhöjd och
+   * ikonstorlek.
    *
-   * OBS FÖR DEN SOM ÄNDRAR: rubriken renderas i Georgia i dag, inte i
-   * Instrument Serif. Teckensnitten är deklarerade i astro.config.mjs men
-   * ingen <Font>-komponent finns i <head>, så inga @font-face-regler
-   * emitteras (verifierat: 0 träffar på @font-face i dist). Kopplas de in
-   * ska talen ovan mätas om — men bara för kontroll, inte för att räkna om
-   * marginalen, eftersom marginalen bara beror på radhöjd och ikonstorlek.
+   * ==================================================================
+   * OMRÄKNAD 2026-09-02 EFTER BYTET TILL ARCHIVO 800
+   * ==================================================================
+   * Rubriken renderades i Georgia när talen ovan skrevs, eftersom
+   * <Font> saknades i <head>. Den bristen är lagad, snittet är bytt två
+   * gånger sedan dess, och konstruktionen är därför mätt om från
+   * början. Canvas TextMetrics vid 1000 px — vid 20 px kvantiserar
+   * webbläsaren fontBoundingBox till heltal och varje snitt ger då
+   * samma falska 0.9/0.2/0.7.
+   *
+   *                      ascent  descent  versal  versal-(a-d)  avvikelse
+   *   Archivo 800        0.878    0.210   0.6875     0.0195      0.195 px
+   *   Instrument Serif   0.990    0.310   0.7188     0.0388      0.388 px
+   *   Georgia            0.917    0.219   0.7031     0.0051      0.051 px
+   *   Times New Roman    0.891    0.216   0.6719    -0.0031      0.031 px
+   *
+   * ARCHIVO HALVERAR AVVIKELSEN mot det snitt det ersätter: 0.39 px
+   * blir 0.20 px. Kontrollmätt i DOM:en mot ikonrutans faktiska mitt
+   * blir talet 0.32 px, och skillnaden mot 0.20 är webbläsarens egen
+   * avrundning av innehållsboxen till hela pixlar (den rapporterar 22
+   * px där geometrin ger 21.76).
+   *
+   * Slutsatsen är alltså att bytet inte bara bevarar konstruktionen
+   * utan förbättrar den, och att marginalen INTE ska räknas om: den är
+   * fortfarande (1.75rem - 1.5rem) / 2. Fallbackkedjan är dessutom ny
+   * — Helvetica Neue och Arial i stället för Georgia och Times — men
+   * antagandet håller där också, eftersom det bara kräver att
+   * versalhöjden ligger nära ascent minus descent.
    */
   .tjanst-kort__rad {
     display: flex;

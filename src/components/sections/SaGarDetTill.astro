@@ -50,6 +50,32 @@ const STEG = [
   aria-labelledby="sa-gar-det-till"
 >
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
+    {/*
+      Å:ET I "SÅ" — KONTROLLERAT EFTER BYTET TILL ARCHIVO 800, INGEN
+      ÅTGÄRD BEHÖVS.
+
+      Archivos Å når 0.9375 em över baslinjen medan snittets egen ascent
+      är 0.878 em. Ringen sticker alltså ut 0.0595 em ÖVER den box
+      webbläsaren räknar som textens innehåll. Det är inte ett fel i
+      snittet utan hur svenska diakriter brukar sitta, men det betyder
+      att rubriken inte kan antas hålla sig inom sin radbox.
+
+      Mätt, överhäng över radboxens överkant:
+
+        30 px / radavstånd 36 (text-3xl)      0.11 px
+        36 px / radavstånd 40 (sm:text-4xl)   1.73 px
+
+      Radavståndet är alltså 1.2 respektive 1.111 em här, inte 1.08 —
+      1.08 gäller H1 i heron. Ingen förälder klipper (overflow är
+      visible hela vägen upp till body), så överhänget äter bara någon
+      pixel av sektionens padding och syns inte.
+
+      KOLLISIONSFALLET UPPSTÅR INTE. Det skulle krävas två rader, och
+      rubriken är enradig vid varje bredd som mäts: 192 px vid 320 och
+      390, 230 px vid 1440. Skulle den någon gång brytas ligger rad
+      tvås Å 1.31 px in i rad ettas underhäng, och DÅ måste
+      radavståndet upp.
+    */}
     <h2
       id="sa-gar-det-till"
       class="font-display text-3xl text-pa-vitt-rubrik sm:text-4xl"

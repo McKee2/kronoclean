@@ -53,13 +53,65 @@ export default defineConfig({
    *             gick till filer som ingen regel kan träffa.
    */
   fonts: [
+    /**
+     * ==================================================================
+     * RUBRIKERNA: ARCHIVO 800. INSTRUMENT SERIF STOD HÄR.
+     * ==================================================================
+     * Bytet är inte en smakändring utan en genreändring, och skälet står
+     * i loggan. Ordmärket mättes pixelvis ur kronoclean-logo.webp med
+     * komponentmärkning (taket överlappar ordmärkets band och filtrerades
+     * bort):
+     *
+     *   lutning 11.25°   strokekontrast 1.53   x/versal 0.750
+     *
+     * Det är alltså en FET, LUTANDE GROTESK — inte ett geometriskt
+     * ordmärke, vilket var antagandet innan det mättes. En rubrikserif
+     * med hög strokekontrast ställd bredvid den läser inte som kontrast
+     * utan som förväxling.
+     *
+     * VARFÖR INTE DM SERIF DISPLAY, som var det första förslaget. Mätt
+     * med canvas TextMetrics på de laddade filerna, stam ÷ tunndel på ett
+     * renderat O vid 200 px:
+     *
+     *                        strokekontrast   stam em   tunndel @ 20 px
+     *   Ordmärket                  1.53          —            —
+     *   Archivo 800                1.32        0.185       2.80 px
+     *   Zilla Slab 700             1.21        0.145       2.40 px
+     *   Source Serif 4 700         2.85        0.185       1.30 px
+     *   Instrument Serif 400       3.20        0.080       0.50 px
+     *   DM Serif Display 400       8.00        0.160       0.40 px
+     *
+     * DM Serif ligger en faktor 5.2 från ordmärket. Men det avgörande
+     * var inte heron utan KORTEN: --font-display bär även rubrikerna på
+     * 20 px i Tjänster och Så går det till, och där blir DM Serifs
+     * tunndel 0.40 px. Under en hel pixel. Snittet har dessutom bara vikt
+     * 400 och kan inte kompenseras.
+     *
+     * Samma mätning avslöjade att Instrument Serif låg på 0.50 px i samma
+     * läge. Kortrubrikerna var alltså redan sköra; bytet lagar dem.
+     *
+     * VARFÖR ARCHIVO OCH INTE EN KONDENSERAD. Archivo skiljer sig från
+     * ordmärket på de två axlar som går att skilja på: UPPRÄTT mot 11.25°
+     * lutning, BRED mot kondenserad. Oswald och Anton ekar i stället
+     * märkets proportioner. Anton föll dessutom på svenskan — dess Å
+     * mäter 1.225 em och går utanför em-rutan.
+     *
+     * EN ENDA VIKT, 800, och det är avsiktligt. Rollen ÄR Archivo 800;
+     * se .font-display i global.css där vikten bor. Laddas fler vikter
+     * blir varje siffra i markup ett val som ingen har räknat på.
+     *
+     * fallbacks är numera SANS. De stod på Georgia/Times, vilket var rätt
+     * för en serif och skulle ha renderat fel snittklass här — och de
+     * matar dessutom optimizedFallbacks, som genererar metrikjusterade
+     * @font-face ur dem.
+     */
     {
       provider: fontProviders.google(),
-      name: 'Instrument Serif',
-      cssVariable: '--font-instrument-serif',
-      weights: [400],
+      name: 'Archivo',
+      cssVariable: '--font-archivo',
+      weights: [800],
       styles: ['normal'],
-      fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
     },
     /**
      * ==================================================================

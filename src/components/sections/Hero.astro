@@ -68,95 +68,83 @@ const svarstid = responsePromise();
 
         <h1
           id="hero-rubrik"
-          class="reveal [--delay:0.07s] font-display text-4xl leading-[1.08] text-pa-mist-rubrik sm:text-5xl lg:text-6xl"
+          class="reveal [--delay:0.07s] font-display text-[2rem] leading-[1.08] tracking-[0.02em] text-pa-mist-rubrik uppercase sm:text-[2.625rem] lg:text-[3.375rem]"
         >
-          Hemstädning i {COMPANY.city}.
+          Hemstädning i {COMPANY.city}
         </h1>
 
         {/*
           ==============================================================
-          VERSALVARIANTEN — UTRÄKNAD OCH INTE APPLICERAD
+          VERSALER I ARCHIVO 800 — APPLICERAD
           ==============================================================
-          "HEMSTÄDNING I VÄXJÖ" provades mot raden ovan. Skissen ligger
-          här som tal, inte som kod: allt som krävs för att slå på den
-          står nedan, och det är tre attributvärden.
+          Rubriken var "Hemstädning i Växjö." i Instrument Serif 400,
+          gemener, 36/48/60. Den är nu versaler i Archivo 800 på
+          32/42/54 med spärr 0.02em och utan punkt.
 
-          INSTRUMENT SERIFS EGNA MÅTT, mätta med canvas TextMetrics på
-          den laddade filen (100 px, andel av em):
+          STORLEKEN ÄR 0.89 AV DEN GAMLA, OCH DET ÄR INGEN EFTERGIFT ÅT
+          320. En gemen rad har sin massa på x-höjden; en versalrad har
+          varenda tecken på versalhöjden. Vid samma storlek blir
+          versalraden alltså tätare och tar över sidan. Talet 0.89 kommer
+          ur den kvoten och stod uträknat här redan innan bytet.
 
-            versalhöjd H   0.72     stapel d     0.74
-            x-höjd x       0.51     underhäng p  0.21
-            Ä (prickarna)  0.92     Å (ringen)   0.99
+          ARCHIVO 800:S EGNA MÅTT, canvas TextMetrics vid 1000 px för att
+          undvika heltalskvantiseringen som 20 px ger (andel av em):
 
-          Ä på 0.92 och Å på 0.99 är det som gör versaler kinkiga i det
-          här snittet: de går nästan upp till em-rutans tak. På EN rad
-          spelar det ingen roll — leading-[1.08] rymmer 0.92 med marginal
-          och versaler har inga underhäng alls. På TVÅ rader blir
-          luftrummet 1.08 - 0.92 = 0.16 em, alltså 5,8 px vid 36 px.
-          Ingen kollision, men raderna läser som ett block.
+            versalhöjd  0.6875     ascent   0.878
+            x-höjd      0.530      descent  0.210
+            Ä           0.8906     Å        0.9375
 
-          BREDDEN ÄR LINJÄR och går att räkna: en versalrad är
-          S * (7.9306 + 19t) px bred, där S är storleken och t är
-          spärren i em. 7.9306 är strängens bredd i em vid noll spärr,
-          och 19 är antalet tecken — webbläsaren lägger spärr även efter
-          det sista, så det är 19 luckor och inte 18.
+          MÄTT RENDERAT, inte räknat:
 
-          VID 320 ÄR MÅTTET 272 px, och det är där versaler kostar. Ur
-          formeln: största storlek som håller EN rad är
+            vy     storlek  rader  radbredder        slack
+            320     32 px     2    260.1 / 135.6     11.9
+            390     32 px     2    278.0 / 117.8     64.0
+           1440     54 px     1    679.1             88.9
 
-            t = 0.02em  ->  32.7 px        t = 0.03em  ->  32.0 px
-            t = 0.04em  ->  31.3 px
+          TVÅRADIG VID 320 OCH 390, och det är priset för att lämna
+          Instrument Serif. Det snittet var osedvanligt smalt — 7.125 em
+          mot Archivos 12.196 em i versaler — och ingen kandidat i
+          utredningen låg i närheten. Villkoret fanns dessutom redan:
+          den gemena rubriken rymdes med 15.5 px till godo och bröt så
+          fort orten växte två tecken ("Hemstädning i Ljungby.").
 
-          Uppmätt, inte bara räknat: 36 px + 0.02em blir 298.2 px och
-          bryter till HEMSTÄDNING I / VÄXJÖ (rader 206 och 74 px).
-          32 px + 0.02em blir 266.0 px — en rad, 6,0 px luft kvar.
+          RADBRYTNINGEN KOLLIDERAR INTE. Å går 0.9375 em över baslinjen
+          och radavståndet är 1.08 em, så rad tvås Å ligger 0.1425 em
+          under rad ettas baslinje. Versaler har inga underhäng alls, så
+          rad ettas bläck slutar PÅ baslinjen och luftrummet är hela
+          steget. För Ä, som rubriken faktiskt innehåller, blir det
+          0.1894 em = 6.06 px vid 32 px.
 
-          RADBRYTNINGSFRÅGAN ÄR INTE EN SKILLNAD MELLAN VARIANTERNA.
-          Orten kommer ur COMPANY.city, och vid 320 bryter BÅDA till två
-          rader så fort orten växer med två tecken. Mätt: "Hemstädning i
-          Ljungby." och "Hemstädning i Älmhult." ger två rader i dagens
-          gemena 36 px, precis som versalerna gör i 32 px + 0.02em.
-          Dagens rubrik ryms på en rad med 15,5 px till godo — den är
-          alltså redan en radbrytning från kanten, och det är ett
-          befintligt villkor som versalerna varken skapar eller lagar.
+          SPÄRREN 0.02 OCH INTE 0 ELLER 0.04. Vid 0 knyter VÄ och XJ ihop
+          sig. Vid 0.04 läser raden som en ETIKETT, och taglinen ligger
+          redan på 0.22em rakt ovanför — två spärrade versalrader 8 px
+          isär hade blivit samma sorts sak.
 
-          FÖRSLAGET, om varianten ska in:
+          UPPERCASE ÄR EN CSS-TRANSFORM, INTE VERSALER I KÄLLAN. Texten i
+          DOM:en är fortfarande "Hemstädning i Växjö", så uppläsare och
+          sökmotorer får meningen och inte skylten.
 
-            storlek   32 / 42 / 54 px  (text-[2rem] sm:text-[2.625rem]
-                                        lg:text-[3.375rem])
-            spärr     0.02em           (tracking-[0.02em])
-            punkten   utgår
-            leading   1.08, oförändrad
+          ------------------------------------------------------------
+          BIEFFEKT SOM INTE ÄR ÅTGÄRDAD: TELEFONNUMRET
+          ------------------------------------------------------------
+          Numret nedan ärver font-display och är alltså också Archivo
+          800 nu. Mätt vid 36 px, bredd i px:
 
-          STORLEKEN SJUNKER 11 %, OCH DET ÄR INTE EN EFTERGIFT ÅT 320.
-          En gemen rad har sin massa på x-höjden 0.51; en versalrad har
-          varenda tecken på 0.72. Vid samma storlek blir versalraden
-          alltså 1,41 gånger tätare och tar över sidan. 0,89 gånger
-          storleken ger samma närvaro: mätt vid 1440 är gemena 60 px
-          427.5 px bred och 64.8 px hög, versaler 54 px + 0.02em är
-          448.8 px bred och 58.3 px hög — 5 % bredare och 10 % lägre.
-          Rubriken byter alltså höjd mot bredd, vilket är precis vad man
-          vill ha av versaler.
+                              Archivo 800   Instrument Serif   kvot
+            07X-XXX XX XX        279.0            198.6       1.40
+            070-123 45 67        253.5            165.7       1.53
+            0470-123 45 67       276.0            180.0       1.53
 
-          SPÄRREN 0.02 OCH INTE 0 ELLER 0.04. Renderat och tittat på:
-          vid 0 sitter versalerna redan hyggligt — snittet har generösa
-          sidosträckor — men VÄ och XJ knyter ihop sig. Vid 0.04 börjar
-          raden läsa som en ETIKETT, och där ligger redan taglinen på
-          0.22em rakt ovanför. Två spärrade versalrader i rad, 8 px
-          isär, hade gjort dem till samma sorts sak. 0.02 öppnar utan
-          att byta register.
+          Vid 320 finns 272 px. Platshållaren bryter alltså till två
+          rader, och det gör ett riktigt VÄXJÖNUMMER också — riktnumret
+          här är 0470, fyra siffror. Ett telefonnummer som bryts mitt i
+          är inte en kosmetisk detalj.
 
-          VARFÖR DEN INTE ÄR APPLICERAD. Det är inte ett typografiskt
-          argument utan ett tonargument, och det är därför det är
-          kundens och inte mitt. Dagens rubrik är en MENING, med punkt,
-          och hela sidan talar så: "Du ringer", "Vi städar", "Jag heter
-          X och driver Kronoclean tillsammans med min familj". Versaler
-          utan punkt är en SKYLT. Skylten är snyggare och tar mer plats;
-          meningen låter som en människa. Sidans centrala påstående är
-          att det här är en familj och inte ett företag, och det
-          argumentet bärs av rösten.
-
-          Båda fungerar. Talen ovan är allt som behövs för att byta.
+          Det är INTE åtgärdat här, för åtgärden är ett val: mindre
+          storlek, text-nowrap med mindre storlek, eller numret i
+          font-sans. Passet som beställdes var typsnittsbytet, och den
+          här raden finns för att valet ska göras medvetet i stället för
+          att upptäckas i produktion.
           ==============================================================
 
           H1 leder med hemstädning, inte med alla fem tjänsterna. En rubrik
