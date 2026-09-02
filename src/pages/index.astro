@@ -5,6 +5,7 @@ import Hero from '../components/sections/Hero.astro';
 import Tjanster from '../components/sections/Tjanster.astro';
 import SaGarDetTill from '../components/sections/SaGarDetTill.astro';
 import Kontakt from '../components/sections/Kontakt.astro';
+import Sidhuvud from '../components/Sidhuvud.astro';
 import Sidfot from '../components/Sidfot.astro';
 import {
   COMPANY,
@@ -134,6 +135,17 @@ const structuredData = buildStructuredData(Astro.site);
       då följer varje grupperingslinje med upp och konkurrerar med
       sektionsgränsen.
     */}
+    {/*
+      SIDHUVUDET ligger utanför <main> av samma skäl som <footer> gör:
+      det är sidmetadata, inte sidans innehåll. Landmärkena blir därmed
+      header / main / footer, i den ordningen och utan nästling.
+
+      Det är sticky och därför INTE en fjärde sektion i rytmen ovan — det
+      har ingen egen plats i mist · mist · vit · mist · mist utan rullar
+      över alla fem. Ytan är mist just för att det ska vara sant: vid
+      rullning 0 är baren samma yta som heron under den.
+    */}
+    <Sidhuvud />
     <main>
       <Hero />
       <Tjanster />

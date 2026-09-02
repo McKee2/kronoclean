@@ -331,8 +331,32 @@
   --fokusring: var(--color-pa-navy-fokus);
 }
 
+/**
+ * SIDHUVUDETS HÖJD. Bor här och inte i Sidhuvud.astro för att TVÅ regler
+ * måste läsa samma tal: barens egen höjd och html:s scroll-padding-top.
+ *
+ * scroll-padding-top är inte kosmetik. Sidhuvudet är position: sticky, så
+ * ett ankarmål som rullas fram hamnar UNDER baren om webbläsaren inte får
+ * veta att de översta 60 px är skymda. Sidan har inga ankarlänkar i dag —
+ * raden står här för att den dagen den första skrivs ska den fungera utan
+ * att någon minns varför den inte gör det.
+ *
+ * Talen kommer ur loggan: ordmärket är läsbart först vid 44 px bildhöjd
+ * (mätt, simulerat DPR 1), plus 8 px luft över och under. Se Sidhuvud.astro.
+ */
+:root {
+  --navhojd: 60px;
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --navhojd: 76px;
+  }
+}
+
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--navhojd);
 }
 
 @media (prefers-reduced-motion: reduce) {

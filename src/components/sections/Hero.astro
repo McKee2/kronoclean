@@ -27,43 +27,32 @@ const svarstid = responsePromise();
 ---
 
 {/*
-  BANDET LIGGER FLUSH MOT SEKTIONENS UNDERKANT, DÄRFÖR pb-0.
+  LOGOTYPEN ÄR BORTA HÄRIFRÅN. Den bor i Sidhuvud.astro och finns bara
+  där. Leta inte efter den i heron.
 
-  Bandets underkant ÄR gränsen hero -> Tjänster. Regeln i index.astro
-  säger att en linje markerar en gräns som ytbytet inte gör; ett fullbrett
-  foto gör det jobbet starkare än en linje, och det är också skälet till
-  att bandet inte kan ligga mitt i heron — då blir det en illustration i
-  en text i stället för sektionens avslut.
+  TOPPLUFTEN ÄR OMRÄKNAD, INTE ÄRVD. Förr: pt-10 (40) + loggan (80) +
+  mb-14 (56) = 176 px ovanför taglinen. Nu: sidhuvudet (60) + pt-12 (48)
+  = 108 px. Skillnaden är vad flytten är värd på första skärmen.
 
-  Luften under heron kommer nu från Tjänsters pt-20/pt-28 ensamt.
+  pt-12/lg:pt-16 och inte sektionernas vanliga pt-20/pt-28: heron står
+  direkt under en bar som redan har sin egen luft, och full sektions-
+  padding under den hade läst som ett hål.
+
+  Intoningarnas trappa är också omräknad. Loggan hade steg 0 och stegen
+  låg på 0.05 / 0.12 / 0.20 / 0.28 / 0.36 / 0.44. Med ett block mindre
+  börjar trappan om på 0 och behåller samma steglängd.
+
+  BANDET LIGGER FLUSH MOT SEKTIONENS UNDERKANT, DÄRFÖR pb-0. Bandets
+  underkant ÄR gränsen hero -> Tjänster. Regeln i index.astro säger att
+  en linje markerar en gräns som ytbytet inte gör; ett fullbrett foto gör
+  det jobbet starkare än en linje, och det är också skälet till att
+  bandet inte kan ligga mitt i heron — då blir det en illustration i en
+  text i stället för sektionens avslut.
+
+  Luften under heron kommer från Tjänsters pt-20/pt-28 ensamt.
 */}
-<section class="yta-mist pt-10 pb-0 lg:pt-14" aria-labelledby="hero-rubrik">
+<section class="yta-mist pt-12 pb-0 lg:pt-16" aria-labelledby="hero-rubrik">
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
-    {/*
-      Logotyp. width/height är filens FAKTISKA pixelmått, 1672x941 — inte
-      avrundade och inte gissade. Attributen används inte för att sätta
-      storlek (det gör höjdklassen och w-auto) utan för att ge kvoten
-      1.7768 innan bilden hämtats, så rutan reserveras och kall laddning
-      ger noll layoutförskjutning.
-
-      Höjderna är satta efter BREDDEN, inte höjden. Den förra loggan var
-      1.5:1 och stod i h-24/lg:h-32 = 144/192 px bred. En lockup på
-      1.7768:1 i samma höjd hade blivit 171/227 px och tagit över första
-      skärmen. h-20/lg:h-28 ger 142/199 px — samma optiska fotavtryck som
-      förut, 16 px lägre.
-    */}
-    <div class="reveal [--delay:0s] mb-14 lg:mb-20">
-      <img
-        src="/kronoclean-logo.webp"
-        alt={COMPANY.name}
-        width="1672"
-        height="941"
-        fetchpriority="high"
-        decoding="async"
-        class="h-20 w-auto lg:h-28"
-      />
-    </div>
-
     {/*
       EN KOLUMN, inte 7/5. Utan porträttkortet till höger finns ingen
       anledning att hålla texten i halva sidan. Brödtexten behåller ändå
@@ -72,14 +61,14 @@ const svarstid = responsePromise();
     */}
     <div class="max-w-3xl">
         <p
-          class="reveal [--delay:0.05s] mb-5 font-sans text-xs font-semibold uppercase tracking-[0.22em] text-pa-mist-accent-liten"
+          class="reveal [--delay:0s] mb-5 font-sans text-xs font-semibold uppercase tracking-[0.22em] text-pa-mist-accent-liten"
         >
           {COMPANY.tagline}
         </p>
 
         <h1
           id="hero-rubrik"
-          class="reveal [--delay:0.12s] font-display text-4xl leading-[1.08] text-pa-mist-rubrik sm:text-5xl lg:text-6xl"
+          class="reveal [--delay:0.07s] font-display text-4xl leading-[1.08] text-pa-mist-rubrik sm:text-5xl lg:text-6xl"
         >
           Hemstädning i {COMPANY.city}.
         </h1>
@@ -112,7 +101,7 @@ const svarstid = responsePromise();
           namn. Familjeargumentet överlever båda formuleringarna.
         */}
         <p
-          class="reveal [--delay:0.2s] mt-6 max-w-lg text-lg leading-relaxed text-pa-mist-brod"
+          class="reveal [--delay:0.15s] mt-6 max-w-lg text-lg leading-relaxed text-pa-mist-brod"
         >
           {
             namn
@@ -138,7 +127,7 @@ const svarstid = responsePromise();
         */}
         {
           telefon.lage !== 'dolt' && (
-            <div class="reveal [--delay:0.28s] mt-10">
+            <div class="reveal [--delay:0.23s] mt-10">
               <p class="mb-2 font-sans text-sm text-pa-mist-brod">
                 {telefon.lage === 'bekraftat'
                   ? 'Ring så bokar vi en tid'
@@ -170,7 +159,7 @@ const svarstid = responsePromise();
 
         {/* Förtroendemarkörer — byggs från datafilen, aldrig hårdkodade */}
         <ul
-          class="reveal [--delay:0.36s] mt-12 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-pa-mist-linje pt-6"
+          class="reveal [--delay:0.31s] mt-12 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-pa-mist-linje pt-6"
         >
           {
             markers.map((marker) => (
@@ -265,7 +254,7 @@ const svarstid = responsePromise();
     precis vad rytmen är byggd för att undvika. Platshållaren får inte
     kosta sidan sin struktur innan fotot ens finns.
   */}
-  <div class="reveal [--delay:0.44s] mt-14 h-48 w-full overflow-hidden sm:h-60 lg:mt-20 lg:h-80 xl:h-96">
+  <div class="reveal [--delay:0.39s] mt-14 h-48 w-full overflow-hidden sm:h-60 lg:mt-20 lg:h-80 xl:h-96">
     <div
       class="flex h-full w-full flex-col items-center justify-center border-t border-b border-pa-mist-linje px-6 text-center"
     >
