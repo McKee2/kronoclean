@@ -39,9 +39,26 @@ import { SEO } from '../data/company';
 <Font cssVariable="--font-archivo" preload={[{ weight: 800 }]} />
 <Font cssVariable="--font-fira-sans" preload={[{ weight: 400 }]} />
 
-{/* TODO: byt ut båda — de är Astros standardmärke, inte Kronocleans */}
+{/*
+  IKONERNA — kronan ur loggan på en mist-platta. Se public/favicon.svg
+  och commit-meddelandet för hur den valdes; kort: hela lockupen läser
+  inte vid 16 px, initialen K sitter ihop med r:et i alfakanalen, och
+  husets tak är vad varje hemtjänstföretag har. Kronan är namnet.
+
+  Plattan är inte dekor. Kronan är navy och flikraden i en webbläsare
+  kan vara vit eller nästan svart; på mist står den på en känd yta med
+  11.02 i kontrast oavsett vad som ligger bakom. Samma skäl som att
+  sajten aldrig sätter text på en yta den inte räknat mot.
+
+  sizes="32x32" på .ico är inte en beskrivning av filen (den bär 16, 32
+  och 48) utan ett styrmedel: utan attributet föredrar Chrome .ico
+  framför .svg. Med det väljer webbläsare som kan SVG vektorn, och
+  resten faller tillbaka på ICO:n.
+
+  apple-touch-icon är 180 px med raka hörn — iOS lägger sin egen mask,
+  och transparens komponeras mot svart där, så plattan är heltäckande.
+*/}
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-{/* apple-touch-icon länkas först när filen finns. En 404 i <head>
-    är samma sorts osanning som en platshållartelefon. */}
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="theme-color" content={SEO.themeColor} />
