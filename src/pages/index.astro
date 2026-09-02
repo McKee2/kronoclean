@@ -57,7 +57,13 @@ const structuredData = buildStructuredData(Astro.site);
     <meta property="og:title" content={SEO.title} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    {/* Rekommenderade */}
+    {/* Rekommenderade. width/height/type låter Facebook och LinkedIn
+        rendera kortet i rätt format vid FÖRSTA delningen, utan att först
+        hämta bilden och gissa — annars visas den första delningen ofta
+        utan bild. Måtten är bildfilens och står i SEO så de inte glider. */}
+    <meta property="og:image:width" content={String(SEO.ogImageWidth)} />
+    <meta property="og:image:height" content={String(SEO.ogImageHeight)} />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:alt" content={SEO.ogImageAlt} />
     <meta property="og:description" content={SEO.description} />
     <meta property="og:site_name" content={COMPANY.name} />

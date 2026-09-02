@@ -144,8 +144,22 @@ export const COMPANY = {
   /** De städar hemma hos kund. Ingen publik besöksadress finns i dag. */
   addressConfirmed: false,
 
-  /** true först när /public/og-kronoclean.jpg (1200x630) faktiskt finns. */
-  ogImageConfirmed: false,
+  /**
+   * Vänd 2026-09-02: public/og-kronoclean.jpg finns, 1200x630 JPEG.
+   *
+   * Innehåll: loggan (600 px bred) på --palett-mist, och under den
+   * "HEMSTÄDNING I VÄXJÖ" i Archivo 800, 48 px, spärr 0.02em, navy.
+   * Texten är glyfkonturer ur SAMMA woff2 som sajten laddar, inte ett
+   * systemtypsnitt. Allt ligger inom mittens 630 px, så en kvadratisk
+   * beskärning (WhatsApp, vissa Slack-kort) tappar ingenting.
+   *
+   * JPEG och inte WebP: LinkedIn hanterar inte WebP. Opak och inte
+   * transparent: transparens komponeras mot svart i flera klienter.
+   * Det var de två felen med fallbacken, loggan.
+   *
+   * Genereras inte av bygget. Byts loggan eller rubriken görs bilden om.
+   */
+  ogImageConfirmed: true,
 
   /**
    * kronoclean.se är registrerad och företagets egen. Vänd 2026-09-01.
@@ -784,6 +798,10 @@ export const SEO = {
   themeColor: '#E1EEFE',
   logoPath: '/kronoclean-logo.webp',
   ogImagePath: '/og-kronoclean.jpg',
+  /** Filens faktiska mått. Verifierade mot filen i bygget; ändras
+   *  bilden måste de följa med, annars ljuger og:image:width/height. */
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
   ogImageAlt: 'Kronoclean — hemstädning i Växjö',
 } as const;
 
