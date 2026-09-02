@@ -9,6 +9,35 @@
  *   - fill="none", stroke="currentColor", stroke-width 1.5
  *   - runda ändar och hörn, inga fyllda ytor, inga två streckbredder
  *   - raka linjer där det går, radie 1–1.5 där något måste rundas
+ *   - BLÄCKETS MITT PÅ 12 ± 0.25 I HÖJDLED. Sjätte regeln, tillagd när
+ *     ikonen flyttade upp bredvid rubriken. Se nedan.
+ *
+ * ==================================================================
+ * SJÄTTE REGELN, OCH VARFÖR DEN INTE BEHÖVDES FÖRRÄN NU
+ * ==================================================================
+ * "Motivet inom 3..21" säger var strecket får finnas, inte var det ska
+ * ligga. Så länge ikonen stod ENSAM ovanför rubriken syntes inte
+ * skillnaden: en ikon som är ritad lågt i sin ruta ser bara ut att ha
+ * lite mer luft över sig.
+ *
+ * Bredvid en rubrik syns den direkt. Rutan centreras mot rubrikens
+ * versalmitt, och står bläcket lågt i rutan hamnar ikonen lågt mot
+ * texten — CSS kan inte rätta det, för CSS ser rutan och inte bläcket.
+ *
+ * Uppmätt med getBBox i webbläsaren, bläckets mitt i höjdled:
+ *
+ *   hemstadning      3.5 .. 20.5   mitt 12.00
+ *   flyttstadning    3.9 .. 20.5   mitt 12.20
+ *   dodsbostadning   4.5 .. 19.8   mitt 12.15
+ *   kontorsstadning  3.9 .. 20.5   mitt 12.20
+ *   hotellstadning   9.5 .. 20.0   mitt 14.75   <- 2.75 fel, omritad
+ *
+ * Fyra av fem följde regeln redan innan den fanns. Sängen gjorde inte
+ * det, och den var dessutom bara 10.5 enheter hög mot de andras 15-17:
+ * både låg OCH liten. Omritad nedan med hög gavel, mitt 12.25 och höjd
+ * 16.5. Marklinjen ligger kvar på 20.5, samma som husets och kontorets,
+ * så ikonerna fortfarande står på samma golv när de ses bredvid varandra
+ * i rutnätet.
  *
  * Samma regler som bocken i heron, bara i en större ruta. Bocken har
  * stroke-width 2.5 för att den renderas i 16 px — vid 28 px skulle den
@@ -62,12 +91,21 @@ const IKONER: Record<string, string[]> = {
     'M7.5 8h3M7.5 12h3M7.5 16h3',
   ],
 
-  // Säng: gavel, madrass, lakanslinje, kudde.
+  /**
+   * Säng: hög gavel, madrass med fotgavel, sarglinje, kudde.
+   *
+   * Gaveln är hög med flit. Den förra sängen var ritad som en riktig säng
+   * är byggd — låg — och blev därmed 10.5 enheter hög i en 24-ruta med
+   * bläckmitten på 14.75. Bredvid en rubrik läste den både som lägre och
+   * som mindre än de fyra andra. En hotellgavel som går upp till 4 ger
+   * samma vertikala massa som huset och kontoret, och 16.5 enheters höjd
+   * med mitten på 12.25.
+   */
   hotellstadning: [
-    'M3.5 20V9.5',
-    'M3.5 13h15.6a2 2 0 0 1 2 2V20',
-    'M3.5 16.6h17.6',
-    'M7 13v-1.4a1.5 1.5 0 0 1 1.5-1.5h3.2a1.5 1.5 0 0 1 1.5 1.5V13',
+    'M4 20.5V5.4a1.4 1.4 0 0 1 1.4-1.4h3.2A1.4 1.4 0 0 1 10 5.4v7.2',
+    'M10 12.6h8.6a2 2 0 0 1 2 2v5.9',
+    'M4 16.4h16.6',
+    'M11.6 12.6v-1.2a1.2 1.2 0 0 1 1.2-1.2h2.4a1.2 1.2 0 0 1 1.2 1.2v1.2',
   ],
 };
 

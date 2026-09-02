@@ -60,7 +60,14 @@ const grupper = ORDNING.map((id) => ({
           </h2>
           <p class="mt-2 font-sans text-sm text-pa-mist-brod">{grupp.villkor}</p>
 
-          <ul class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {/*
+            items-start: korten kramar sitt innehåll i stället för att
+            sträckas till radens höjd. Se resonemanget om dödsbokortet i
+            stilblocket. Tas bort den dagen varje kort har en CTA i
+            underkanten — då ska raden bottna jämnt igen, och
+            .tjanst-kort har redan height:100% kvar för just det.
+          */}
+          <ul class="mt-8 grid grid-cols-1 items-start gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {grupp.tjanster.map((tjanst) => (
               <li>
                 {/*
@@ -79,16 +86,46 @@ const grupper = ORDNING.map((id) => ({
                       stilblocket nedan och tänds därför av sig självt.
                 */}
                 <div class="tjanst-kort">
-                  <TjanstIkon
-                    slug={tjanst.slug}
-                    class="mb-4 h-7 w-7 shrink-0 text-pa-vitt-ikon"
-                  />
-                  <h3 class="font-display text-xl text-pa-vitt-rubrik">{tjanst.name}</h3>
+                  {/*
+                    RADEN. Ikon och namn tillsammans, förklaringen under
+                    båda. leading-7 står utskrivet trots att text-xl ger
+                    28 px ändå: ikonens marginal är uträknad ur just den
+                    radhöjden, och ett tyst standardvärde som någon ändrar
+                    skulle flytta ikonen utan att någon förstår varför.
+                  */}
+                  <div class="tjanst-kort__rad">
+                    {/*
+                      Ikonens mått ligger som utilities och inte i
+                      stilblocket, och det är inte en stilfråga: <svg>
+                      renderas av TjanstIkon och får därför den
+                      komponentens scope, inte den här filens. En scoped
+                      regel på .tjanst-kort__ikon hade inte matchat något
+                      alls. Härledningen av mt-0.5 står i stilblocket.
+                      24 px = ritrutan 1:1. shrink-0 så en lång rubrik
+                      trycker ihop texten och aldrig ikonen.
+                    */}
+                    <TjanstIkon
+                      slug={tjanst.slug}
+                      class="mt-0.5 h-6 w-6 shrink-0 text-pa-vitt-ikon"
+                    />
+                    <h3 class="font-display text-xl leading-7 text-pa-vitt-rubrik">
+                      {tjanst.name}
+                    </h3>
+                  </div>
                   {'blurb' in tjanst && (
-                    <p class="mt-2 font-sans text-sm leading-relaxed text-pa-vitt-brod">
+                    <p class="tjanst-kort__blurb font-sans text-base leading-relaxed text-pa-vitt-brod">
                       {tjanst.blurb}
                     </p>
                   )}
+                  {/*
+                    SLOT 3: bocklista. <ul class="tjanst-kort__punkter">
+                    SLOT 4: CTA. Får klassen tjanst-kort__cta, som sätter
+                            margin-top:auto och bottnar den i kortet.
+                    Båda läggs till HÄR, i den ordningen. Inget ovanför
+                    behöver röras: kortet är en flexkolumn med height:100%,
+                    så nya barn staplar sig under blurben av sig själva och
+                    CTA:n hittar underkanten utan att någon räknar höjder.
+                  */}
                 </div>
               </li>
             ))}
@@ -100,9 +137,49 @@ const grupper = ORDNING.map((id) => ({
 </section>
 
 <style>
-  /* Kortets utseende. h-full + flex-col så alla kort i en rad blir lika
-     höga — det är vad som gör att dödsbostädningens saknade rad läser som
-     avsiktligt luft i stället för som ett trasigt kort. */
+  /**
+   * Kortets utseende. Flexkolumnen är det som gör att bocklista och CTA
+   * kan läggas till senare utan att något ovanför skrivs om.
+   *
+   * ==================================================================
+   * DÖDSBOKORTET: LIKA HÖGA KORT SLUTADE FUNGERA I DEN HÄR LAYOUTEN
+   * ==================================================================
+   * height:100% + lika höga kort var rätt i den gamla layouten, där
+   * kortet var tre staplade block (ikon / namn / förklaring). Uppmätt vid
+   * 1440: kort 176 px, luft under namnet 56 px — 32 %.
+   *
+   * Med ikonen uppflyttad bredvid namnet är kortet två block. Samma
+   * saknade förklaring, samma sträckning: kort 142 px, luft 65 px — 46 %.
+   * Båda talen är mätta renderat. Det är hålet man ser, inte luften.
+   *
+   * Notera att det bara gällde tre kolumner, alltså >= 1024 px. Under det
+   * står dödsbokortet ensamt på sin rad och kramade redan sitt innehåll:
+   * 78 px, och där har det aldrig sett trasigt ut.
+   *
+   * TRE BEHANDLINGAR PRÖVADES RENDERAT:
+   *
+   *   1. Sträckt, rubriken kvar i överkant. Hålet blir 65 px och läser
+   *      som en förklaring som inte laddat.
+   *
+   *   2. Sträckt, innehållet vertikalt centrerat. Ser komponerat ut i dag
+   *      men flyttar kortets rubrik en halv rad ned medan de två andra
+   *      ligger kvar i överkant — och just den gemensamma rubrikraden är
+   *      hela poängen med att ikonen flyttade upp. Dessutom ROTNAR den:
+   *      med bocklistor av olika längd i varje kort skulle varje rubrik
+   *      hamna på sin egen höjd. En regel man måste ta bort igen är inte
+   *      en regel.
+   *
+   *   3. VALD. Kortet kramar sitt innehåll, items-start på rutnätet.
+   *      Rubrikraden ligger kvar i linje med de andra två, kortet blir
+   *      78 px, och det ser ut precis som det redan gör vid 390 px. Ett
+   *      kort som är exakt så stort som sitt innehåll läser som ett val;
+   *      ett kort som är större än sitt innehåll läser som ett fel.
+   *
+   * height:100% står kvar och är vilande så länge rutnätet har
+   * items-start. Det är avsiktligt: den dagen varje kort har en CTA i
+   * underkanten tas items-start bort, korten blir lika höga igen och
+   * CTA:erna linjerar över raden. Ett ord i markup, inget här.
+   */
   .tjanst-kort {
     display: flex;
     height: 100%;
@@ -111,6 +188,128 @@ const grupper = ORDNING.map((id) => ({
     border: 1px solid var(--color-pa-vitt-linje);
     background: var(--palett-vit);
     padding: 1.5rem;
+  }
+
+  /**
+   * ==================================================================
+   * OPTISK LINJERING: IKONRUTAN MOT RUBRIKENS VERSALMITT
+   * ==================================================================
+   * Problemet är att en 24x24-ruta och en serif inte har någon gemensam
+   * naturlig linje. Baslinjen duger inte: ikonen har ingen baslinje, och
+   * lägger man rutans underkant på textens baslinje hamnar ikonen högt,
+   * eftersom bläcket i rutan är centrerat och versalerna inte är det.
+   *
+   * TRE VÄGAR PRÖVADES:
+   *
+   *   align-items: center       Ser rätt ut på en rad och FEL på två:
+   *                             ikonen centreras då mot hela rubrikblocket
+   *                             och glider ned en halv rad. Rubrikerna
+   *                             ryms på en rad i dag, men "ryms i dag" är
+   *                             inte en konstruktion.
+   *
+   *   vertical-align på inline  Kräver att ikonen är inline och att
+   *                             justeringen anges i em med ett magiskt
+   *                             tal per teckensnitt.
+   *
+   *   flex-start + räknad       Vald. Ikonrutans mitt läggs på FÖRSTA
+   *   marginal                  radboxens mitt. Radbrytning kan inte
+   *                             flytta den, för första radboxen ligger
+   *                             alltid överst.
+   *
+   * VARFÖR RADBOXENS MITT ÄR VERSALMITTEN. Uppmätt i webbläsaren,
+   * Georgia på 20 px i en radbox på 28 px:
+   *
+   *   ascent 0.9175 em, descent 0.22 em, versalhöjd 0.7031 em
+   *   innehållshöjd = (0.9175 + 0.22) * 20        = 22.75 px
+   *   halvt radavstånd = (28 - 22.75) / 2         =  2.625 px
+   *   baslinje = 2.625 + 18.35                    = 20.975 px
+   *   versalmitt = 20.975 - 14.06/2               = 13.945 px
+   *   radboxens mitt = 28 / 2                     = 14.000 px
+   *
+   * Skillnad 0.055 px. Sammanträffandet är inte slumpmässigt: de två
+   * sammanfaller exakt när versalhöjd = ascent - descent, och det gäller
+   * för Georgia (0.6975 mot 0.7031) och för Times New Roman (0.6725 mot
+   * 0.6719, skillnad 0.011 px). Konstruktionen håller alltså hela vägen
+   * ned genom fallbackkedjan.
+   *
+   * OBS FÖR DEN SOM ÄNDRAR: rubriken renderas i Georgia i dag, inte i
+   * Instrument Serif. Teckensnitten är deklarerade i astro.config.mjs men
+   * ingen <Font>-komponent finns i <head>, så inga @font-face-regler
+   * emitteras (verifierat: 0 träffar på @font-face i dist). Kopplas de in
+   * ska talen ovan mätas om — men bara för kontroll, inte för att räkna om
+   * marginalen, eftersom marginalen bara beror på radhöjd och ikonstorlek.
+   */
+  .tjanst-kort__rad {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /**
+   * IKONENS TVÅ TAL, som står som utilities i markup ovan eftersom <svg>
+   * tillhör TjanstIkons scope och inte den här filens:
+   *
+   *   h-6 w-6   1.5rem = 24 px = ritrutan 1:1. Strecket på 1.5 blir då
+   *             exakt 1.5 px i stället för 1.75 som vid 28 px, och
+   *             bläckhöjden (~17 px) förhåller sig till versalhöjden
+   *             (14 px) som 1.25:1. Vid 28 px blev kvoten 1.46:1 och
+   *             ikonen läste som en bricka bredvid rubriken i stället för
+   *             som dess följeslagare.
+   *
+   *   mt-0.5    (radboxen 1.75rem - ikonrutan 1.5rem) / 2 = 0.125rem.
+   *             Ändras leading-7 eller h-6 måste den räknas om.
+   */
+
+  /**
+   * ==================================================================
+   * BLURBEN: 14 -> 16 PX
+   * ==================================================================
+   * Den öppna frågan från kontrastpasset. Där mättes att all liten text
+   * på vitt låg på 14 px, färgen höjdes till 8.31 och storleken lämnades.
+   * Här är den.
+   *
+   * 16 px, inte 15. 16 är webbläsarens standardstorlek och den lägsta
+   * storlek som läser som brödtext i stället för som en uppgift bredvid
+   * något annat. 15 hade varit en hedge: ett steg på 1 px syns inte som
+   * ett beslut, bara som brus.
+   *
+   * Med det blir sidans skala semantisk i stället för godtycklig:
+   *
+   *   12 px  ögonbryn      hero-taglinen, versalspärrad
+   *   14 px  UPPGIFTER     det man skannar: förtroendemarkörer,
+   *                        telefonetiketten, gruppens prisvillkor
+   *   16 px  BRÖDTEXT      det man läser i meningar: kortens blurbar
+   *   18 px  hero-ingress  sidans enda ingress
+   *
+   * Undantaget som bekräftar att skalan gäller LÄSTEXT: .steg-nummer i
+   * "Så går det till" står på 15 px. Den är en siffra i en cirkel på
+   * 2.25rem och storleken är satt av cirkeln, inte av läsbarheten. Den
+   * ligger utanför skalan därför att den inte läses som text.
+   *
+   * KONKURRERAR DEN MED HERO-BRÖDTEXTEN? Nej, och skillnaden bärs inte
+   * av storleken ensam. Hero-stycket är 18 px, max-w-lg (512 px), står
+   * ensamt i sin kolumn på mist med 29.25 px radavstånd. Blurben är 16 px
+   * i ett 357 px brett kort på vitt med 26 px radavstånd. Uppmätt vid
+   * 1440: hero-styckets underkant y=537, första kortets överkant y=1098 —
+   * 561 px isär, alltså aldrig bredvid varandra utan på sin höjdst i samma
+   * rullband. Steget 18:16 är 1.125, och det är hero-ingressens 18 som
+   * håller hierarkin: sänks den till 16 blir de två jämnstora.
+   *
+   * KVAR PÅ 14 PX, OCH DET ÄR NÄSTA DOMINOBRICKA: stegtexterna i "Så går
+   * det till" är brödtext med samma jobb som blurbarna och står på samma
+   * vita yta. De borde följa med till 16. Inte gjort här — det här passet
+   * gäller korten, och en storleksändring i en annan sektion hör hemma i
+   * ett eget pass där hela den sektionens rytm mäts om.
+   *
+   * Sidoeffekt värd att notera: korten blev KORTARE trots större text.
+   * Uppmätt vid 1440, 176 -> 142 px, för att den uppflyttade ikonen
+   * sparar 44 px (ikonrad 28 + mb-4 16) och blurben bara kostar 10.
+   */
+  /* 0.75rem, inte 0.5rem som förut. Blurben hänger inte längre direkt
+     under rubriken utan under HELA raden, och avståndet ska läsa som
+     avståndet mellan två block, inte mellan två textrader. */
+  .tjanst-kort__blurb {
+    margin-top: 0.75rem;
   }
 
   /*

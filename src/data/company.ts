@@ -654,6 +654,49 @@ export type SegmentId = keyof typeof SEGMENT;
  * Ordningen är avsiktlig och är den ordning de ska renderas i: de tre
  * privata först, företagstjänsterna sist. Sortera aldrig listan i en
  * komponent — då flyttar prioriteringen ut ur datafilen.
+ *
+ * ====================================================================
+ * BOCKLISTORNA — VAD SOM BEHÖVS FRÅN KUNDEN INNAN DE KAN BYGGAS
+ * ====================================================================
+ * Fältet blir `punkter?: readonly string[]` här, och tjänstekortet har
+ * redan en slot för det. Listorna byggs INTE förrän svaren finns; en
+ * bocklista är ett löfte om vad som ingår, och ett påhittat löfte är
+ * dyrare än ingen lista.
+ *
+ * PER TJÄNST:
+ *   1. 3-5 punkter som beskriver VAD SOM GÖRS, inte vad kunden vinner.
+ *      Samma detaljnivå i alla fem, annars läser rutnätet som att någon
+ *      tjänst är tunnare än de andra.
+ *   2. Vad som INTE ingår. Behövs även om det aldrig renderas — det
+ *      avgör hur punkterna får formuleras. "Fönsterputs" i en lista som
+ *      inte omfattar fönster är en reklamation, inte en formulering.
+ *   3. Varierar listan med bostadens storlek, städfrekvens eller
+ *      prisnivå? I så fall: vad är den fasta kärnan och vad är tillval?
+ *      Korten kan bara visa kärnan.
+ *   4. Är varje punkt RUT-berättigat ARBETE? RUT följer både köparen och
+ *      arbetets art. En punkt som inte är RUT-berättigad kan inte stå
+ *      okvalificerad under en rubrik som säger 50 % RUT-avdrag.
+ *
+ * PER TJÄNST, DET SOM ÄR SPECIFIKT:
+ *   flyttstadning    Vilken besiktningsstandard åsyftas, och finns
+ *                    omstädningsgaranti? Blurben påstår redan
+ *                    "besiktningsstandard"; en bocklista gör påståendet
+ *                    kontrollerbart, och då måste det tåla kontroll.
+ *   dodsbostadning   Ingår tömning, bortforsling, sortering och
+ *                    skänkning — eller bara städning? Och vad görs
+ *                    uttryckligen INTE (värdesaker, bouppteckning,
+ *                    nycklar)? Samma svar är dessutom det som saknas
+ *                    innan blurben kan skrivas.
+ *   kontorsstadning  Frekvensalternativ, ingår förbrukningsmaterial,
+ *                    faktureringsvillkor.
+ *   hotellstadning   Per rum eller per pass, ingår linne, ingår
+ *                    gemensamma ytor i grundpriset.
+ *
+ * FORM: högst ~30 tecken per punkt. Uppmätt i den renderade texten på
+ * 16 px: smalaste kortets textyta är 224 px vid 320 px vy, en bockikon
+ * plus mellanrum tar 24 px, och medelbredden är 6.87 px per tecken. Över
+ * ~30 tecken bryts punkten till två rader vid 320 och listan börjar läsa
+ * som prosa i stället för som en lista.
  */
 export const SERVICES = [
   {
